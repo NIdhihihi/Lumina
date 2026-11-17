@@ -11,7 +11,11 @@ export async function GET() {
 export async function POST(request: Request) {
   const task = await request.json();
   const tasks = readJSON<any[]>(FILENAME, []);
-  const newTask = { ...task, id: Date.now().toString(), status: 'todo' };
+  const newTask = { 
+    ...task, 
+    id: task.id || Date.now().toString(), 
+    status: task.status || 'want_to_do' 
+  };
   tasks.push(newTask);
   writeJSON(FILENAME, tasks);
   return NextResponse.json(newTask);

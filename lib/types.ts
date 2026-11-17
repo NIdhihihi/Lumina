@@ -24,13 +24,22 @@ export interface Subject {
   type?: "college" | "personal";
 }
 
+export interface TaskAssignee {
+  name: string;
+  avatar: string;
+}
+
 export interface Task {
   id: string;
   title: string;
-  status: "todo" | "doing" | "done";
+  description?: string;
+  status: "want_to_do" | "doing" | "done" | "todo";
   dueDate?: string;
   priority: "low" | "medium" | "high";
   subjectId?: string;
+  projectName?: string;
+  phase?: string;
+  assignee?: TaskAssignee;
   attendancePercent?: number;
   safeBunks?: number;
 }

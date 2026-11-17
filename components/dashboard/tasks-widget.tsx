@@ -33,7 +33,14 @@ const activeTasks = safeTasks
                 <Circle className="h-4 w-4 mt-0.5 text-muted-foreground" />
                 <div>
                   <p className="font-medium text-sm leading-none mb-1">{task.title}</p>
-                  <p className="text-[10px] text-muted-foreground capitalize">{task.status}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {task.status === "doing"
+                      ? "⚡ Doing"
+                      : task.status === "want_to_do"
+                      ? "🎯 Goal"
+                      : task.status}
+                    {task.projectName ? ` • ${task.projectName}` : ""}
+                  </p>
                 </div>
               </div>
             ))

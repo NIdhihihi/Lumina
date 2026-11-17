@@ -1,33 +1,89 @@
 [
   {
-    "id": "1",
-    "title": "Complete DBMS assignment",
+    "id": "task-1",
+    "title": "Synthesize 4-Bit ALU in Verilog",
+    "description": "Implement XOR and adder logic modules for the lab report.",
     "status": "doing",
-    "dueDate": "2026-09-10",
+    "dueDate": "2026-11-20",
     "priority": "high",
-    "subjectId": "2"
+    "subjectId": "1",
+    "projectName": "Digital Systems Lab",
+    "phase": "Phase 2: Logic Synthesis",
+    "assignee": {
+      "name": "Renee",
+      "avatar": "👩‍💻"
+    }
   },
   {
-    "id": "2",
-    "title": "Read TOC pumping lemma notes",
-    "status": "todo",
-    "dueDate": "2026-09-12",
+    "id": "task-2",
+    "title": "Compile LaTeX Lab Report Draft",
+    "description": "Combine circuit diagrams from Whiteboard and Verilog code snippets into Overleaf.",
+    "status": "doing",
+    "dueDate": "2026-11-21",
     "priority": "high",
-    "subjectId": "1"
+    "projectName": "Digital Systems Lab",
+    "phase": "Phase 2: Logic Synthesis",
+    "assignee": {
+      "name": "Vatsal",
+      "avatar": "👨‍💻"
+    }
   },
   {
-    "id": "3",
-    "title": "OS process scheduling lab",
-    "status": "todo",
-    "dueDate": "2026-09-15",
+    "id": "task-3",
+    "title": "Draft ER Diagram Practice Assignment",
+    "description": "DBMS Normalization practice for upcoming midterm exam.",
+    "status": "want_to_do",
+    "dueDate": "2026-11-20",
+    "priority": "high",
+    "subjectId": "2",
+    "projectName": "Coursework Sprint",
+    "phase": "Sprint 3: Midterm Prep",
+    "assignee": {
+      "name": "Renee",
+      "avatar": "👩‍💻"
+    }
+  },
+  {
+    "id": "task-4",
+    "title": "Hardware Simulation & Testbench Run",
+    "description": "Verify propagation delays and timing waveforms on ModelSim.",
+    "status": "want_to_do",
+    "dueDate": "2026-11-22",
     "priority": "medium",
-    "subjectId": "3"
+    "projectName": "Digital Systems Lab",
+    "phase": "Phase 3: Verification",
+    "assignee": {
+      "name": "Priya",
+      "avatar": "🐼"
+    }
   },
   {
-    "id": "4",
-    "title": "Review attendance policy",
-    "status": "todo",
-    "dueDate": "2026-09-09",
-    "priority": "low"
+    "id": "task-5",
+    "title": "SE Project Phase 2 Code Review",
+    "description": "Prepare architecture diagram and API documentation for professor review.",
+    "status": "want_to_do",
+    "dueDate": "2026-11-23",
+    "priority": "medium",
+    "subjectId": "3",
+    "projectName": "SE Project Phase 2",
+    "phase": "Phase 2: Code Review",
+    "assignee": {
+      "name": "Vatsal",
+      "avatar": "👨‍💻"
+    }
+  },
+  {
+    "id": "task-6",
+    "title": "Gate Level Truth Table Verification",
+    "description": "Verified logic gate schematics against assignment specification.",
+    "status": "done",
+    "dueDate": "2026-11-16",
+    "priority": "medium",
+    "projectName": "Digital Systems Lab",
+    "phase": "Phase 1: Architecture",
+    "assignee": {
+      "name": "Renee",
+      "avatar": "👩‍💻"
+    }
   }
 ]
