@@ -1,1 +1,74 @@
-[]
+[
+  {
+    "id": "exp-1",
+    "title": "Canteen Thali Lunch",
+    "amount": 80,
+    "category": "Food",
+    "type": "good",
+    "description": "Wholesome lunch during long TOC lab break",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "exp-2",
+    "title": "Cutting Chai & Samosa",
+    "amount": 35,
+    "category": "Food",
+    "type": "bad",
+    "description": "Afternoon snack with study squad",
+    "date": "2026-11-17"
+  },
+  {
+    "id": "exp-3",
+    "title": "Lab Manual & Schema Printouts",
+    "amount": 45,
+    "category": "Study",
+    "type": "good",
+    "description": "Hardware lab schematic printouts for Digital Systems",
+    "date": "2026-11-16"
+  },
+  {
+    "id": "exp-4",
+    "title": "Shared Auto Rickshaw",
+    "amount": 40,
+    "category": "Transport",
+    "type": "good",
+    "description": "Campus to Metro station",
+    "date": "2026-11-16"
+  },
+  {
+    "id": "exp-5",
+    "title": "Late Night Energy Drinks & Chips",
+    "amount": 160,
+    "category": "Entertainment",
+    "type": "bad",
+    "description": "Cramming session snacks for DBMS ER assignment",
+    "date": "2026-11-15"
+  },
+  {
+    "id": "exp-6",
+    "title": "Monthly Campus Bus Pass",
+    "amount": 500,
+    "category": "Transport",
+    "type": "good",
+    "description": "Discounted college transit pass",
+    "date": "2026-11-14"
+  },
+  {
+    "id": "exp-7",
+    "title": "Cafeteria Cold Coffee",
+    "amount": 60,
+    "category": "Food",
+    "type": "bad",
+    "description": "Break between lectures",
+    "date": "2026-11-13"
+  },
+  {
+    "id": "exp-8",
+    "title": "Digital Electronics Reference Guide",
+    "amount": 250,
+    "category": "Study",
+    "type": "good",
+    "description": "Used reference book for logic gate synthesis",
+    "date": "2026-11-12"
+  }
+]
