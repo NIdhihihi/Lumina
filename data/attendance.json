@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "name": "Theory of Computation",
+    "code": "CS401",
+    "attended": 28,
+    "total": 35,
+    "color": "#6366f1",
+    "type": "college"
+  },
+  {
+    "id": "2",
+    "name": "Database Systems",
+    "code": "CS301",
+    "attended": 22,
+    "total": 28,
+    "color": "#22c55e",
+    "type": "college"
+  },
+  {
+    "id": "3",
+    "name": "Operating Systems",
+    "code": "CS302",
+    "attended": 18,
+    "total": 24,
+    "color": "#f97316",
+    "type": "college"
+  }
+]

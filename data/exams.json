@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "subjectId": "1",
+    "title": "TOC Mid-sem Exam",
+    "date": "2026-09-20T09:00:00.000Z",
+    "weight": "high"
+  },
+  {
+    "id": "2",
+    "subjectId": "2",
+    "title": "DBMS Final Exam",
+    "date": "2026-09-25T09:00:00.000Z",
+    "weight": "high"
+  },
+  {
+    "id": "3",
+    "subjectId": "3",
+    "title": "OS Quiz",
+    "date": "2026-09-18T09:00:00.000Z",
+    "weight": "medium"
+  }
+]

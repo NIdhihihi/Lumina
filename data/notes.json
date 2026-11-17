@@ -1,0 +1,21 @@
+[
+  {
+    "id": "1",
+    "title": "Academic Policy Handbook",
+    "content": "Institutional attendance and examination policy summary.",
+    "createdAt": "2026-09-01T10:00:00.000Z",
+    "attachments": [
+      {
+        "name": "Academic_Policy_Handbook.pdf",
+        "textContent": "Section 4.2 Attendance Requirements\n\nAll students enrolled in credit-bearing courses must maintain a minimum attendance of 75% in each subject to be eligible for end-semester examinations.\n\nStudents falling below 75% attendance may apply for condonation only under documented medical or official leave circumstances approved by the department head.\n\nRepeated absences without approval may result in detention from examinations regardless of internal assessment scores.\n\nSection 4.3 Leave Policy\n\nShort leave up to 3 consecutive days requires prior intimation to the class coordinator.\n\nMedical leave beyond 3 days requires a valid medical certificate submitted within 7 days of return.",
+        "approxPage": 12
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "TOC Lecture Notes",
+    "content": "Pumping lemma, regular languages, and NFA to DFA conversion.",
+    "createdAt": "2026-09-03T14:00:00.000Z"
+  }
+]
