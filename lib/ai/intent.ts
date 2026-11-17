@@ -16,10 +16,12 @@ const INTENT_RULES: { intent: CopilotIntent; patterns: RegExp[] }[] = [
   {
     intent: "document",
     patterns: [
-      /\b(document|pdf|policy|syllabus|handbook|uploaded)\b/i,
-      /\bwhat (does|is) (the|my)\b.*\b(requirement|policy|rule)\b/i,
+      /\b(document|pdf|policy|syllabus|handbook|uploaded|textbook|note|notes|chapter|lecture)\b/i,
+      /\bwhat (does|is) (the|my)\b.*\b(requirement|policy|rule|definition|meaning)\b/i,
       /\bminimum attendance\b/i,
       /\baccording to (the|my)\b/i,
+      /\b(pumping lemma|automata|k-map|karnaugh|boolean|logic gate|dfa|nfa|regular language)\b/i,
+      /\bexplain\b/i,
     ],
   },
   {

@@ -14,8 +14,28 @@
   },
   {
     "id": "2",
-    "title": "TOC Lecture Notes",
-    "content": "Pumping lemma, regular languages, and NFA to DFA conversion.",
-    "createdAt": "2026-09-03T14:00:00.000Z"
+    "title": "Theory of Computation & Automata (Hopcroft)",
+    "content": "Pumping lemma, regular languages, and NFA to DFA conversion textbook notes.",
+    "createdAt": "2026-09-03T14:00:00.000Z",
+    "attachments": [
+      {
+        "name": "Hopcroft_TOC_Chapter_4.pdf",
+        "textContent": "Chapter 4: Properties of Regular Languages and the Pumping Lemma.\n\nThe Pumping Lemma states: If L is a regular language, then there exists a pumping length p >= 1 such that any string w in L with length |w| >= p can be decomposed as w = xyz satisfying: (1) |y| > 0, (2) |xy| <= p, and (3) for all i >= 0, the string xy^i z is in L. The primary application of the Pumping Lemma is to demonstrate that non-regular languages such as L = {0^n 1^n | n >= 0} or palindromes cannot be recognized by finite state automata.",
+        "approxPage": 126
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Digital Logic & Computer Design (Mano)",
+    "content": "Boolean algebra simplification, Karnaugh Maps (K-Maps), and universal logic gates.",
+    "createdAt": "2026-09-05T09:30:00.000Z",
+    "attachments": [
+      {
+        "name": "Mano_Digital_Design_K_Maps.pdf",
+        "textContent": "Chapter 3: Gate-Level Minimization and Karnaugh Maps.\n\nA Karnaugh map (K-map) is a pictorial method used to minimize Boolean algebraic expressions. Cells are arranged such that adjacent cells differ by only one bit according to Gray code ordering (00, 01, 11, 10). Minterms are combined into groups of sizes that are powers of two (1, 2, 4, 8, 16) to eliminate literal variables and construct the minimal Sum of Products (SOP) or Product of Sums (POS) expressions for logic synthesis.",
+        "approxPage": 78
+      }
+    ]
   }
 ]
