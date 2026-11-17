@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
+import { BatteryGuardianIndicator } from "@/components/battery/battery-guardian-indicator"
 import {
   LayoutDashboard,
   Calendar,
@@ -163,6 +164,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Right side */}
           <div className="ml-auto flex items-center gap-3">
+            <BatteryGuardianIndicator />
+
             {/* Theme Toggle */}
             {mounted && (
               <Button

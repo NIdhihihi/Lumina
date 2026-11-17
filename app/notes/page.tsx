@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 
 export default function NotesPage() {
   const router = useRouter();
-  const { notes, fetchNotes } = useLuminaStore();
+  const { notes, fetchNotes, isRagPaused } = useLuminaStore();
   const [search, setSearch] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [newNote, setNewNote] = useState({ title: "", content: "" });
@@ -104,11 +104,12 @@ export default function NotesPage() {
             variant="outline"
             size="sm"
             onClick={handleReindex}
-            disabled={isReindexing}
-            title="Re-run local TensorFlow.js vector indexing"
+            disabled={isReindexing || isRagPaused}
+            title={isRagPaused ? "RAG indexing paused by Smart Battery Guardian (<15% power)" : "Re-run local TensorFlow.js vector indexing"}
+            className={isRagPaused ? "border-amber-500/40 text-amber-500" : ""}
           >
             <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isReindexing ? "animate-spin" : ""}`} />
-            Re-Index DB
+            {isRagPaused ? "RAG Paused (Battery)" : "Re-Index DB"}
           </Button>
 
           <TextbookUploadDialog onSuccess={fetchNotes} />

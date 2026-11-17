@@ -7,6 +7,8 @@ interface LuminaState {
   tasks: any[];
   chatHistory: any[];
   timetable: any[];
+  isRagPaused: boolean;
+  setRagPaused: (paused: boolean) => void;
   fetchNotes: () => Promise<void>;
   fetchAttendance: () => Promise<void>;
   fetchExpenses: () => Promise<void>;
@@ -22,6 +24,9 @@ export const useLuminaStore = create<LuminaState>((set) => ({
   tasks: [],
   chatHistory: [],
   timetable: [],
+  isRagPaused: false,
+
+  setRagPaused: (paused: boolean) => set({ isRagPaused: paused }),
 
   fetchNotes: async () => {
     const res = await fetch('/api/notes');

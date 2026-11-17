@@ -9,6 +9,7 @@ import { FocusWidget } from "@/components/dashboard/focus-widget";
 import { ScheduleWidget } from "@/components/dashboard/schedule-widget";
 import { CoolingDayWidget } from "@/components/dashboard/cooling-day-widget";
 import { AIRecommendationWidget } from "@/components/dashboard/ai-recommendation-widget";
+import { OverleafPreview } from "@/components/dashboard/overleaf-preview";
 
 export default function Dashboard() {
   const { fetchNotes, fetchAttendance, fetchExpenses, fetchTasks, fetchTimetable } = useLuminaStore();
@@ -39,6 +40,8 @@ export default function Dashboard() {
         <ScheduleWidget className="col-span-4" />
         <TasksWidget className="col-span-3" />
       </div>
+
+      <OverleafPreview />
 
       <AIRecommendationWidget />
     </div>
