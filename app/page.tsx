@@ -11,13 +11,14 @@ import { CoolingDayWidget } from "@/components/dashboard/cooling-day-widget";
 import { AIRecommendationWidget } from "@/components/dashboard/ai-recommendation-widget";
 
 export default function Dashboard() {
-  const { fetchNotes, fetchAttendance, fetchExpenses, fetchTasks } = useLuminaStore();
+  const { fetchNotes, fetchAttendance, fetchExpenses, fetchTasks, fetchTimetable } = useLuminaStore();
 
   useEffect(() => {
     fetchNotes();
     fetchAttendance();
     fetchExpenses();
     fetchTasks();
+    fetchTimetable();
   }, []);
 
   return (

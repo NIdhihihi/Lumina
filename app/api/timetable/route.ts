@@ -11,14 +11,27 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await request.json();
-  const sessions = readJSON<ClassSession[]>(FILENAME, []);
+  const { searchParams } = new URL(request.url);
+  const isReplace = searchParams.get('replace') === 'true';
+  const body = await request.json();
+  const existing = isReplace ? [] : readJSON<ClassSession[]>(FILENAME, []);
+
+  if (Array.isArray(body)) {
+    const newSessions: ClassSession[] = body.map((s, idx) => ({
+      ...s,
+      id: s.id || `${Date.now()}-${idx}`,
+    }));
+    const combined = [...existing, ...newSessions];
+    writeJSON(FILENAME, combined);
+    return NextResponse.json(combined);
+  }
+
   const newSession: ClassSession = {
-    ...session,
-    id: Date.now().toString(),
+    ...body,
+    id: body.id || Date.now().toString(),
   };
-  sessions.push(newSession);
-  writeJSON(FILENAME, sessions);
+  existing.push(newSession);
+  writeJSON(FILENAME, existing);
   return NextResponse.json(newSession);
 }
 

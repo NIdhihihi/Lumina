@@ -10,14 +10,16 @@ import { Progress } from "@/components/ui/progress";
 import { useLuminaStore } from "@/hooks/use-lumina-store";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { TimetableUploadDialog } from "@/components/attendance/timetable-upload-dialog";
 
 export default function AttendancePage() {
-  const { attendance, fetchAttendance } = useLuminaStore();
+  const { attendance, fetchAttendance, fetchTimetable } = useLuminaStore();
   const [isAdding, setIsAdding] = useState(false);
   const [newSubject, setNewSubject] = useState("");
 
   useEffect(() => {
     fetchAttendance();
+    fetchTimetable();
   }, []);
 
   const handleAddSubject = async () => {
@@ -80,33 +82,42 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Attendance Tracker</h2>
-          <p className="text-muted-foreground">Keep your attendance above 75% threshold.</p>
+          <p className="text-muted-foreground">Keep your attendance above 75% threshold with live Bunk Analytics.</p>
         </div>
-        <Dialog open={isAdding} onOpenChange={setIsAdding}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" /> Add Subject
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Subject</DialogTitle>
-            </DialogHeader>
-            <div className="py-4">
-              <Input 
-                placeholder="Subject Name" 
-                value={newSubject}
-                onChange={e => setNewSubject(e.target.value)}
-              />
-            </div>
-            <DialogFooter>
-              <Button onClick={handleAddSubject}>Add</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-2">
+          <TimetableUploadDialog
+            existingSubjects={Array.isArray(attendance) ? attendance : []}
+            onImportComplete={() => {
+              fetchAttendance();
+              fetchTimetable();
+            }}
+          />
+          <Dialog open={isAdding} onOpenChange={setIsAdding}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" /> Add Subject
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Subject</DialogTitle>
+              </DialogHeader>
+              <div className="py-4">
+                <Input 
+                  placeholder="Subject Name" 
+                  value={newSubject}
+                  onChange={e => setNewSubject(e.target.value)}
+                />
+              </div>
+              <DialogFooter>
+                <Button onClick={handleAddSubject}>Add</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

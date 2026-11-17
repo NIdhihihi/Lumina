@@ -6,11 +6,13 @@ interface LuminaState {
   expenses: any[];
   tasks: any[];
   chatHistory: any[];
+  timetable: any[];
   fetchNotes: () => Promise<void>;
   fetchAttendance: () => Promise<void>;
   fetchExpenses: () => Promise<void>;
   fetchTasks: () => Promise<void>;
   fetchChatHistory: () => Promise<void>;
+  fetchTimetable: () => Promise<void>;
 }
 
 export const useLuminaStore = create<LuminaState>((set) => ({
@@ -19,6 +21,7 @@ export const useLuminaStore = create<LuminaState>((set) => ({
   expenses: [],
   tasks: [],
   chatHistory: [],
+  timetable: [],
 
   fetchNotes: async () => {
     const res = await fetch('/api/notes');
@@ -48,5 +51,11 @@ export const useLuminaStore = create<LuminaState>((set) => ({
     const res = await fetch('/api/ai/chat');
     const data = await res.json();
     set({ chatHistory: data });
+  },
+
+  fetchTimetable: async () => {
+    const res = await fetch('/api/timetable');
+    const data = await res.json();
+    set({ timetable: data });
   },
 }));

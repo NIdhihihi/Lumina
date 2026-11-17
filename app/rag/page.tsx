@@ -140,7 +140,7 @@ export default function AIChatPage() {
                       {chat.studyPlan ? <StudyPlan studyPlan={chat.studyPlan} /> : null}
                       {chat.taskPriorities?.length ? (
                         <div className="mt-3 space-y-2">
-                          {chat.taskPriorities.map((task) => (
+                          {chat.taskPriorities.map((task: any) => (
                             <div key={task.taskId} className="rounded-md border bg-background px-3 py-2 text-sm">
                               <div className="font-medium">{task.title}</div>
                               <div className="text-xs text-muted-foreground">{task.reason}</div>
