@@ -1,0 +1,75 @@
+{
+  "messages": [
+    {
+      "id": "msg-1",
+      "senderId": "vatsal",
+      "senderName": "Vatsal",
+      "senderAvatar": "👨‍💻",
+      "content": "Hey Renee, did you finish the truth table for the 4-bit ALU lab report?",
+      "timestamp": "2026-11-17T20:15:00.000Z"
+    },
+    {
+      "id": "msg-2",
+      "senderId": "renee",
+      "senderName": "Renee",
+      "senderAvatar": "👩‍💻",
+      "content": "Just sketched the half-adder and XOR logic gate circuit on the whiteboard. Check the pinned board!",
+      "timestamp": "2026-11-17T20:18:00.000Z",
+      "pinnedType": "whiteboard",
+      "pinnedTitle": "Half-Adder Logic Gate Diagram"
+    },
+    {
+      "id": "msg-3",
+      "senderId": "priya",
+      "senderName": "Priya",
+      "senderAvatar": "🐼",
+      "content": "I dropped the Verilog module into our live pasteboard. You guys can edit it together directly.",
+      "timestamp": "2026-11-17T20:22:00.000Z",
+      "pinnedType": "code",
+      "pinnedTitle": "half_adder.v"
+    }
+  ],
+  "whiteboardElements": [
+    {
+      "id": "gate-1",
+      "type": "gate",
+      "gateType": "XOR",
+      "x": 160,
+      "y": 100,
+      "label": "Sum = A ⊕ B",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "gate-2",
+      "type": "gate",
+      "gateType": "AND",
+      "x": 160,
+      "y": 240,
+      "label": "Carry = A · B",
+      "color": "#10b981"
+    },
+    {
+      "id": "wire-1",
+      "type": "wire",
+      "points": [{ "x": 60, "y": 90 }, { "x": 160, "y": 90 }],
+      "label": "Input A",
+      "color": "#64748b"
+    },
+    {
+      "id": "wire-2",
+      "type": "wire",
+      "points": [{ "x": 60, "y": 120 }, { "x": 160, "y": 120 }],
+      "label": "Input B",
+      "color": "#64748b"
+    }
+  ],
+  "pinnedSnippet": {
+    "id": "snippet-1",
+    "title": "half_adder.v (Verilog HDL)",
+    "language": "verilog",
+    "code": "// 1-bit Half Adder Module\nmodule half_adder (\n    input  wire a,\n    input  wire b,\n    output wire sum,\n    output wire carry\n);\n    // Live edited by Renee & Vatsal\n    assign sum   = a ^ b;\n    assign carry = a & b;\nendmodule\n",
+    "lastEditedBy": "Renee",
+    "updatedAt": "2026-11-17T20:25:00.000Z",
+    "isPinned": true
+  }
+}

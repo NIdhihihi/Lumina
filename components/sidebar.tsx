@@ -10,12 +10,14 @@ import {
   Wallet, 
   Timer, 
   Calendar, 
-  CheckSquare 
+  CheckSquare,
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+  { icon: MessageSquare, label: "Discussion Hub", href: "/hub" },
   { icon: BrainCircuit, label: "AI Study", href: "/rag" },
   { icon: NotebookPen, label: "Notes", href: "/notes" },
   { icon: UserCheck, label: "Attendance", href: "/attendance" },
