@@ -82,7 +82,7 @@ export function parseTimetableText(rawText: string): ParsedTimetableEntry[] {
 
   const timeRangeRegex = /(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:-|to|–|—)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i;
   const singleTimeRegex = /(?:at\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i;
-  const roomRegex = /(?:room|hall|lab|rm|l)[\s-]*([a-z0-9\-]+)/i;
+  const roomRegex = /\b(?:room|hall|lab|rm|lh|lt|audi)[\s-]*([a-z0-9\-]+)\b/i;
   const courseCodeRegex = /\b([A-Z]{2,4}[\s-]?\d{3,4})\b/;
 
   for (const line of lines) {
@@ -116,10 +116,11 @@ export function parseTimetableText(rawText: string): ParsedTimetableEntry[] {
       const codeMatch = line.match(courseCodeRegex);
       const subjectCode = codeMatch ? codeMatch[1].replace(/\s+/g, "") : undefined;
 
-      // Clean subject title by removing matched time and room
+      // Clean subject title by removing matched time, room, and course code
       let cleaned = line
         .replace(timeMatch[0], "")
         .replace(roomRegex, "")
+        .replace(courseCodeRegex, "")
         .replace(/^[-\s|:;,.]+/, "")
         .replace(/[-\s|:;,.]+$/, "")
         .trim();
@@ -172,4 +173,55 @@ export function parseTimetableText(rawText: string): ParsedTimetableEntry[] {
   }
 
   return entries;
+}
+
+export interface ExtractedSubject {
+  name: string;
+  code?: string;
+  color: string;
+  type: "college";
+  sessionCount: number;
+}
+
+const PALETTE = [
+  "#3b82f6", // blue
+  "#10b981", // emerald
+  "#8b5cf6", // violet
+  "#f59e0b", // amber
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#6366f1", // indigo
+  "#14b8a6", // teal
+];
+
+/**
+ * Extracts distinct subjects from parsed timetable slots for automatic
+ * synchronization into the 75% Attendance Tracker.
+ */
+export function extractUniqueSubjects(entries: ParsedTimetableEntry[]): ExtractedSubject[] {
+  const subjectMap = new Map<string, ExtractedSubject>();
+
+  for (const entry of entries) {
+    const rawName = entry.subjectName.trim() || entry.subjectCode || "Class";
+    const key = rawName.toLowerCase();
+
+    if (!subjectMap.has(key)) {
+      const color = PALETTE[subjectMap.size % PALETTE.length];
+      subjectMap.set(key, {
+        name: rawName,
+        code: entry.subjectCode,
+        color,
+        type: "college",
+        sessionCount: 1,
+      });
+    } else {
+      const existing = subjectMap.get(key)!;
+      existing.sessionCount += 1;
+      if (!existing.code && entry.subjectCode) {
+        existing.code = entry.subjectCode;
+      }
+    }
+  }
+
+  return Array.from(subjectMap.values());
 }

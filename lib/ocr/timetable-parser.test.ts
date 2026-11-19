@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseTimetableText } from "./timetable-parser";
+import { parseTimetableText, extractUniqueSubjects } from "./timetable-parser";
 
 describe("timetable OCR parser", () => {
   it("parses day headers and time slots correctly", () => {
@@ -42,5 +42,37 @@ Friday
     expect(parsed[0].startTime).toBe("14:00");
     expect(parsed[0].endTime).toBe("15:00");
     expect(parsed[0].location).toMatch(/Hall-B/i);
+  });
+
+  it("extracts distinct unique subjects for 75% attendance auto-sync", () => {
+    const rawSample = `
+MONDAY
+09:00 - 10:00 Compiler Design CS501 Room 101
+10:00 - 11:00 Computer Networks CS502 Room 102
+
+TUESDAY
+09:00 - 10:00 Compiler Design CS501 Room 101
+14:00 - 15:00 Algorithms CS503 Lab 3
+    `;
+    const entries = parseTimetableText(rawSample);
+    expect(entries.length).toBe(4);
+
+    const subjects = extractUniqueSubjects(entries);
+    expect(subjects.length).toBe(3);
+    
+    const compiler = subjects.find((s) => s.name.includes("Compiler Design"));
+    expect(compiler).toBeDefined();
+    expect(compiler?.code).toBe("CS501");
+    expect(compiler?.sessionCount).toBe(2);
+    expect(compiler?.color).toMatch(/^#/);
+
+    const networks = subjects.find((s) => s.name.includes("Computer Networks"));
+    expect(networks).toBeDefined();
+    expect(networks?.code).toBe("CS502");
+    expect(networks?.sessionCount).toBe(1);
+
+    const algos = subjects.find((s) => s.name.includes("Algorithms"));
+    expect(algos).toBeDefined();
+    expect(algos?.code).toBe("CS503");
   });
 });
