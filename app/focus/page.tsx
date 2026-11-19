@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users } from "lucide-react";
+import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users, AppWindow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -269,8 +269,8 @@ export default function FocusPage() {
                     </Button>
                   </div>
 
-                  {/* Pet Symbol Toggle Button */}
-                  <div className="flex justify-center items-center pt-1">
+                  {/* Pet Symbol Toggle Button & Laptop Screen Float */}
+                  <div className="flex flex-wrap justify-center items-center gap-2 pt-1">
                     <button
                       type="button"
                       onClick={togglePetEnabled}
@@ -284,6 +284,20 @@ export default function FocusPage() {
                     >
                       <span className="text-sm">🐱</span>
                       <span>Study Pet: <strong>{focusSession.isPetEnabled ? "ON" : "OFF"}</strong></span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== "undefined") {
+                          window.dispatchEvent(new CustomEvent("lumina-toggle-pip"));
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      title="Float pet across all windows on your laptop screen"
+                    >
+                      <AppWindow className="w-3.5 h-3.5" />
+                      <span>Float Across Laptop Screen</span>
                     </button>
                   </div>
 

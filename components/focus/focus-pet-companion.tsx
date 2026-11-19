@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useLuminaStore } from "@/hooks/use-lumina-store";
 import { getPetReaction, type PetMood } from "@/lib/focus/pet-companion";
 import { 
@@ -10,7 +11,8 @@ import {
   Volume2, 
   VolumeX, 
   Timer,
-  Users
+  Users,
+  AppWindow
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -72,9 +74,11 @@ export function FocusPetCompanion() {
   const [position, setPosition] = useState({ x: 0, y: 0 }); // offset from bottom-right
   const [isDragging, setIsDragging] = useState(false);
   const [showSpeech, setShowSpeech] = useState(true);
+  const [pipContainer, setPipContainer] = useState<HTMLElement | null>(null);
 
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number }>({ x: 0, y: 0, posX: 0, posY: 0 });
   const speechTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pipWindowRef = useRef<any>(null);
 
   const { isActive, timeLeft, totalDuration, distractionCount, petMood, petSpeech, isPetEnabled } = focusSession;
 
@@ -107,6 +111,11 @@ export function FocusPetCompanion() {
         if (soundEnabled) playWebAudioSound("chime");
         setTimeout(() => {
           stopFocus();
+          if (pipWindowRef.current) {
+            try {
+              pipWindowRef.current.close();
+            } catch {}
+          }
         }, 5000);
       }
     }, 1000);
@@ -114,7 +123,7 @@ export function FocusPetCompanion() {
     return () => clearInterval(timer);
   }, [isActive, timeLeft, totalDuration, updateFocusTimeLeft, setPetMood, stopFocus, soundEnabled]);
 
-  // 2. Global Tab/Window Unfocus Detection (Angry Slap on distraction)
+  // 2. Global Tab/Window Unfocus Detection (Direct comic slap on the pet character)
   useEffect(() => {
     if (!isActive) return;
 
@@ -183,7 +192,7 @@ export function FocusPetCompanion() {
     }
   }, [isDragging]);
 
-  // 6. Speech Bubble Auto-Hide (keep speech visible for 6s after each update)
+  // 6. Speech Bubble Auto-Hide (keep speech visible for 7s after each update)
   useEffect(() => {
     if (petSpeech) {
       setShowSpeech(true);
@@ -196,6 +205,15 @@ export function FocusPetCompanion() {
       if (speechTimeoutRef.current) clearTimeout(speechTimeoutRef.current);
     };
   }, [petSpeech, petMood]);
+
+  // 7. Custom Document PiP Toggle Event Listener (triggers floating across laptop screen)
+  useEffect(() => {
+    const handleCustomPip = () => {
+      togglePipWindow();
+    };
+    window.addEventListener("lumina-toggle-pip", handleCustomPip);
+    return () => window.removeEventListener("lumina-toggle-pip", handleCustomPip);
+  }, [pipContainer]);
 
   // Draggable logic
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -236,14 +254,344 @@ export function FocusPetCompanion() {
     if (soundEnabled) playWebAudioSound("slap");
   };
 
-  // Called strictly after all hooks
+  // Toggle PiP floating window across laptop screen
+  const togglePipWindow = async () => {
+    if (pipContainer) {
+      if (pipWindowRef.current) {
+        try {
+          pipWindowRef.current.close();
+        } catch {}
+      }
+      setPipContainer(null);
+      pipWindowRef.current = null;
+      return;
+    }
+
+    if (typeof window === "undefined" || !("documentPictureInPicture" in window)) {
+      return;
+    }
+
+    try {
+      const pipWin = await (window as any).documentPictureInPicture.requestWindow({
+        width: 220,
+        height: 250,
+      });
+      pipWindowRef.current = pipWin;
+
+      // Copy stylesheet rules to PiP window
+      [...document.styleSheets].forEach((sheet) => {
+        try {
+          if (sheet.href) {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = sheet.href;
+            pipWin.document.head.appendChild(link);
+          } else if (sheet.cssRules) {
+            const style = document.createElement("style");
+            style.textContent = [...sheet.cssRules].map((r) => r.cssText).join("");
+            pipWin.document.head.appendChild(style);
+          }
+        } catch {}
+      });
+
+      // Inject clean borderless dark styles
+      const customStyle = document.createElement("style");
+      customStyle.textContent = `
+        * { box-sizing: border-box; }
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #090d16 !important;
+          color: #f8fafc !important;
+          overflow: hidden !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          user-select: none !important;
+          font-family: system-ui, -apple-system, sans-serif !important;
+        }
+      `;
+      pipWin.document.head.appendChild(customStyle);
+      pipWin.document.title = "Kiko Focus Mascot";
+
+      const container = pipWin.document.createElement("div");
+      container.id = "pip-pet-root";
+      container.style.width = "100%";
+      container.style.display = "flex";
+      container.style.justifyContent = "center";
+      pipWin.document.body.appendChild(container);
+      setPipContainer(container);
+
+      pipWin.addEventListener("pagehide", () => {
+        setPipContainer(null);
+        pipWindowRef.current = null;
+      });
+    } catch (err) {
+      console.warn("PiP Error:", err);
+    }
+  };
+
+  // Called strictly after all 18 hooks
   if (!isPetEnabled || (!isActive && petMood !== "celebrating")) {
     return null;
   }
 
+  // The Mascot Character & Pill Component
+  const mascotBody = (
+    <div className={`relative flex flex-col items-center select-none ${isSlapping ? "animate-shake" : ""}`}>
+      {/* Floating Speech Bubble */}
+      {showSpeech && (
+        <div className="relative mb-2 max-w-[210px] animate-in fade-in zoom-in-95 duration-200">
+          <div
+            className={`p-2.5 rounded-2xl text-[11px] font-medium shadow-2xl border backdrop-blur-md transition-all ${
+              petMood === "angry"
+                ? "bg-red-950/90 border-red-500/60 text-red-200 font-semibold"
+                : petMood === "jealous"
+                ? "bg-purple-950/90 border-purple-500/60 text-purple-200"
+                : petMood === "celebrating"
+                ? "bg-emerald-950/90 border-emerald-500/60 text-emerald-200 font-bold"
+                : "bg-card/95 border-border/80 text-foreground"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-1">
+              <p className="leading-snug">{petSpeech}</p>
+              <button
+                onClick={() => setShowSpeech(false)}
+                className="text-muted-foreground hover:text-foreground shrink-0 p-0.5"
+                title="Dismiss dialogue"
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
+            </div>
+          </div>
+          {/* Bubble pointer tail */}
+          <div
+            className={`w-2.5 h-2.5 rotate-45 mx-auto -mt-1.5 border-r border-b ${
+              petMood === "angry"
+                ? "bg-red-950/90 border-red-500/60"
+                : petMood === "jealous"
+                ? "bg-purple-950/90 border-purple-500/60"
+                : petMood === "celebrating"
+                ? "bg-emerald-950/90 border-emerald-500/60"
+                : "bg-card/95 border-border/80"
+            }`}
+          />
+        </div>
+      )}
+
+      {/* Comic Slap Burst Label on the character */}
+      {isSlapping && (
+        <div className="absolute -top-6 text-xl font-black italic text-red-500 drop-shadow-[0_4px_8px_rgba(239,68,68,0.7)] animate-bounce z-20">
+          💥 SLAP!
+        </div>
+      )}
+
+      {/* Character Visual Mascot */}
+      <div 
+        onClick={handlePoke}
+        className={`relative cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95 ${
+          petMood === "angry" ? "animate-bounce" : "animate-float"
+        }`}
+        title="Click to interact with your Study Pet!"
+      >
+        <svg
+          width="76"
+          height="82"
+          viewBox="0 0 100 108"
+          className="drop-shadow-[0_12px_22px_rgba(0,0,0,0.4)]"
+        >
+          {/* Ambient Aura */}
+          <circle
+            cx="50"
+            cy="52"
+            r="44"
+            fill={
+              petMood === "angry"
+                ? "rgba(239, 68, 68, 0.28)"
+                : petMood === "jealous"
+                ? "rgba(168, 85, 247, 0.28)"
+                : petMood === "celebrating"
+                ? "rgba(34, 197, 94, 0.28)"
+                : "rgba(59, 130, 246, 0.24)"
+            }
+            className="animate-pulse"
+          />
+
+          {/* Cloud/Puff Hair Bumps (Mascot silhouette) */}
+          <circle cx="50" cy="22" r="14" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
+          <circle cx="33" cy="28" r="13" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
+          <circle cx="67" cy="28" r="13" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
+          <circle cx="24" cy="40" r="12" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
+          <circle cx="76" cy="40" r="12" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
+
+          {/* Main Rounded Head & Body */}
+          <rect
+            x="22"
+            y="28"
+            width="56"
+            height="50"
+            rx="22"
+            fill={petMood === "angry" ? "#ef4444" : petMood === "jealous" ? "#8b5cf6" : "#4f8cf6"}
+          />
+
+          {/* Arms */}
+          <ellipse cx="18" cy="56" rx="6" ry="11" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
+          <ellipse cx="82" cy="56" rx="6" ry="11" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
+
+          {/* Legs */}
+          <rect x="36" y="74" width="8" height="12" rx="4" fill={petMood === "angry" ? "#b91c1c" : petMood === "jealous" ? "#6d28d9" : "#2563eb"} />
+          <rect x="56" y="74" width="8" height="12" rx="4" fill={petMood === "angry" ? "#b91c1c" : petMood === "jealous" ? "#6d28d9" : "#2563eb"} />
+
+          {/* Terminal Screen Face Visor */}
+          <rect
+            x="30"
+            y="38"
+            width="40"
+            height="28"
+            rx="9"
+            fill="#090d16"
+            stroke={petMood === "angry" ? "#f87171" : petMood === "jealous" ? "#c084fc" : "#38bdf8"}
+            strokeWidth="1.8"
+          />
+
+          {/* Expressive Terminal Face Elements */}
+          {petMood === "angry" ? (
+            <g>
+              <path d="M 37 49 L 43 52 L 37 55" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              <path d="M 63 49 L 57 52 L 63 55" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              <path d="M 46 59 Q 50 56 54 59" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </g>
+          ) : petMood === "jealous" ? (
+            <g>
+              <path d="M 37 51 L 43 51 L 43 55" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              <path d="M 63 51 L 57 51 L 57 55" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              <line x1="47" y1="58" x2="53" y2="58" stroke="#c084fc" strokeWidth="1.8" strokeLinecap="round" />
+            </g>
+          ) : petMood === "celebrating" ? (
+            <g>
+              <path d="M 37 53 Q 41 47 45 53" stroke="#4ade80" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+              <path d="M 55 53 Q 59 47 63 53" stroke="#4ade80" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+              <path d="M 46 58 Q 50 62 54 58" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </g>
+          ) : (
+            <g>
+              <path d="M 38 48 L 44 52 L 38 56" stroke="#38bdf8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              <line x1="56" y1="56" x2="63" y2="56" stroke="#38bdf8" strokeWidth="2.4" strokeLinecap="round" className="animate-pulse" />
+            </g>
+          )}
+
+          {/* Chest Terminal Logo: > _ */}
+          <path d="M 45 70 L 48 72 L 45 74" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.85" />
+          <line x1="51" y1="74" x2="55" y2="74" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" opacity="0.85" />
+        </svg>
+
+        {/* Status indicator dot */}
+        <div className="absolute -bottom-0.5 right-1">
+          {petMood === "angry" ? (
+            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-600 text-[8px] text-white shadow ring-2 ring-background">
+              💢
+            </span>
+          ) : petMood === "jealous" ? (
+            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-purple-600 text-[8px] text-white shadow ring-2 ring-background">
+              😤
+            </span>
+          ) : (
+            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-500 text-[8px] text-white shadow ring-2 ring-background">
+              ⚡
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Floating Mini Controls Pill (Image 2 style) */}
+      <div className="mt-1.5 flex items-center gap-1.5 bg-card/90 border border-border/80 px-2.5 py-1 rounded-full shadow-2xl backdrop-blur-md">
+        <div className="flex items-center gap-1 pr-1 border-r border-border/60">
+          <Timer className="w-3 h-3 text-primary" />
+          <span className="font-mono text-[11px] font-bold tracking-tight">{timeFormatted}</span>
+        </div>
+
+        <div className="flex items-center gap-0.5">
+          {/* Float across laptop screen button */}
+          <Button
+            size="icon"
+            variant="ghost"
+            className={`h-5 w-5 rounded-full ${pipContainer ? "text-primary bg-primary/15" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={togglePipWindow}
+            title={pipContainer ? "Dock pet back to Lumina tab" : "Float pet on top of all laptop apps & windows"}
+          >
+            <AppWindow className="h-2.5 w-2.5" />
+          </Button>
+
+          {/* Squad Rivalry Prompt */}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-5 w-5 rounded-full text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+            onClick={triggerSquadJealousy}
+            title="Squad Peer Check"
+          >
+            <Users className="h-2.5 w-2.5" />
+          </Button>
+
+          {/* Sound toggle */}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground"
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            title={soundEnabled ? "Mute Slap Sound" : "Enable Slap Sound"}
+          >
+            {soundEnabled ? <Volume2 className="h-2.5 w-2.5" /> : <VolumeX className="h-2.5 w-2.5" />}
+          </Button>
+
+          {/* Pause/Resume */}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-5 w-5 rounded-full"
+            onClick={isActive ? pauseFocus : resumeFocus}
+            title={isActive ? "Pause Focus" : "Resume Focus"}
+          >
+            {isActive ? <Pause className="h-2.5 w-2.5" /> : <Play className="h-2.5 w-2.5 text-emerald-400" />}
+          </Button>
+
+          {/* Hide / Dismiss */}
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-5 w-5 rounded-full text-destructive hover:bg-destructive/10"
+            onClick={togglePetEnabled}
+            title="Hide Pet"
+          >
+            <X className="h-2.5 w-2.5" />
+          </Button>
+        </div>
+      </div>
+
+      {distractionCount > 0 && (
+        <span className="mt-1 text-[9px] text-muted-foreground/80 font-mono">
+          {distractionCount} slap{distractionCount > 1 ? "s" : ""}
+        </span>
+      )}
+    </div>
+  );
+
+  // If floating on top of laptop screen via Document PiP:
+  if (pipContainer) {
+    return createPortal(
+      <div className="w-full flex items-center justify-center p-1">
+        {mascotBody}
+      </div>,
+      pipContainer
+    );
+  }
+
+  // Inside Lumina: Floating in the corner across all Lumina tabs
   return (
     <>
-      {/* Full-Screen Comic Slap Overlay on Distraction */}
+      {/* Full-Screen Comic Slap Overlay inside Lumina when distracted */}
       {isSlapping && (
         <div className="fixed inset-0 z-[9999] pointer-events-none flex items-center justify-center bg-red-500/10 backdrop-blur-[1px] animate-in fade-in zoom-in-95 duration-150">
           <div className="relative flex flex-col items-center">
@@ -257,7 +605,7 @@ export function FocusPetCompanion() {
         </div>
       )}
 
-      {/* Floating Pet Companion Container */}
+      {/* Floating Pet Companion */}
       <aside
         aria-label="Lumina Focus Pet Companion"
         onMouseDown={handleMouseDown}
@@ -268,226 +616,7 @@ export function FocusPetCompanion() {
           isDragging ? "cursor-grabbing" : "cursor-grab"
         }`}
       >
-        {/* Floating Speech Bubble (Auto-fades after 7s or toggleable) */}
-        {showSpeech && (
-          <div className="relative mb-2 max-w-[220px] animate-in fade-in zoom-in-95 duration-200">
-            <div
-              className={`p-2.5 rounded-2xl text-[11px] font-medium shadow-2xl border backdrop-blur-md transition-all ${
-                petMood === "angry"
-                  ? "bg-red-950/80 border-red-500/50 text-red-200"
-                  : petMood === "jealous"
-                  ? "bg-purple-950/80 border-purple-500/50 text-purple-200"
-                  : petMood === "celebrating"
-                  ? "bg-emerald-950/80 border-emerald-500/50 text-emerald-200 font-semibold"
-                  : "bg-card/95 border-border/80 text-foreground"
-              }`}
-            >
-              <div className="flex items-start justify-between gap-1">
-                <p className="leading-snug">{petSpeech}</p>
-                <button
-                  onClick={() => setShowSpeech(false)}
-                  className="text-muted-foreground hover:text-foreground shrink-0 p-0.5"
-                  title="Dismiss dialogue"
-                >
-                  <X className="w-2.5 h-2.5" />
-                </button>
-              </div>
-            </div>
-            {/* Bubble pointer tail */}
-            <div
-              className={`w-2.5 h-2.5 rotate-45 mx-auto -mt-1.5 border-r border-b ${
-                petMood === "angry"
-                  ? "bg-red-950/80 border-red-500/50"
-                  : petMood === "jealous"
-                  ? "bg-purple-950/80 border-purple-500/50"
-                  : petMood === "celebrating"
-                  ? "bg-emerald-950/80 border-emerald-500/50"
-                  : "bg-card/95 border-border/80"
-              }`}
-            />
-          </div>
-        )}
-
-        {/* Character Visual Mascot */}
-        <div 
-          onClick={handlePoke}
-          className={`relative cursor-pointer transition-transform duration-300 hover:scale-105 active:scale-95 ${
-            petMood === "angry" ? "animate-bounce" : "animate-float"
-          }`}
-          title="Click to interact with your Study Pet!"
-        >
-          <svg
-            width="80"
-            height="86"
-            viewBox="0 0 100 108"
-            className="drop-shadow-[0_12px_20px_rgba(0,0,0,0.35)]"
-          >
-            {/* Ambient Aura */}
-            <circle
-              cx="50"
-              cy="52"
-              r="44"
-              fill={
-                petMood === "angry"
-                  ? "rgba(239, 68, 68, 0.25)"
-                  : petMood === "jealous"
-                  ? "rgba(168, 85, 247, 0.25)"
-                  : petMood === "celebrating"
-                  ? "rgba(34, 197, 94, 0.25)"
-                  : "rgba(59, 130, 246, 0.22)"
-              }
-              className="animate-pulse"
-            />
-
-            {/* Cloud/Puff Hair Bumps (Inspired by mascot shape) */}
-            <circle cx="50" cy="22" r="14" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
-            <circle cx="33" cy="28" r="13" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
-            <circle cx="67" cy="28" r="13" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
-            <circle cx="24" cy="40" r="12" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
-            <circle cx="76" cy="40" r="12" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
-
-            {/* Main Rounded Head & Body */}
-            <rect
-              x="22"
-              y="28"
-              width="56"
-              height="50"
-              rx="22"
-              fill={petMood === "angry" ? "#ef4444" : petMood === "jealous" ? "#8b5cf6" : "#4f8cf6"}
-            />
-
-            {/* Arms */}
-            <ellipse cx="18" cy="56" rx="6" ry="11" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
-            <ellipse cx="82" cy="56" rx="6" ry="11" fill={petMood === "angry" ? "#dc2626" : petMood === "jealous" ? "#7c3aed" : "#3b82f6"} />
-
-            {/* Legs */}
-            <rect x="36" y="74" width="8" height="12" rx="4" fill={petMood === "angry" ? "#b91c1c" : petMood === "jealous" ? "#6d28d9" : "#2563eb"} />
-            <rect x="56" y="74" width="8" height="12" rx="4" fill={petMood === "angry" ? "#b91c1c" : petMood === "jealous" ? "#6d28d9" : "#2563eb"} />
-
-            {/* Terminal Screen Face Visor */}
-            <rect
-              x="30"
-              y="38"
-              width="40"
-              height="28"
-              rx="9"
-              fill="#090d16"
-              stroke={petMood === "angry" ? "#f87171" : petMood === "jealous" ? "#c084fc" : "#38bdf8"}
-              strokeWidth="1.8"
-            />
-
-            {/* Expressive Terminal Face Elements */}
-            {petMood === "angry" ? (
-              // Angry Face: > : (
-              <g>
-                <path d="M 37 49 L 43 52 L 37 55" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <path d="M 63 49 L 57 52 L 63 55" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <path d="M 46 59 Q 50 56 54 59" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" fill="none" />
-              </g>
-            ) : petMood === "jealous" ? (
-              // Jealous Face: ¬ _ ¬
-              <g>
-                <path d="M 37 51 L 43 51 L 43 55" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <path d="M 63 51 L 57 51 L 57 55" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <line x1="47" y1="58" x2="53" y2="58" stroke="#c084fc" strokeWidth="1.8" strokeLinecap="round" />
-              </g>
-            ) : petMood === "celebrating" ? (
-              // Happy Face: ^ _ ^
-              <g>
-                <path d="M 37 53 Q 41 47 45 53" stroke="#4ade80" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-                <path d="M 55 53 Q 59 47 63 53" stroke="#4ade80" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-                <path d="M 46 58 Q 50 62 54 58" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" fill="none" />
-              </g>
-            ) : (
-              // Focused CLI Face: > _ (like image 2)
-              <g>
-                <path d="M 38 48 L 44 52 L 38 56" stroke="#38bdf8" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                <line x1="56" y1="56" x2="63" y2="56" stroke="#38bdf8" strokeWidth="2.4" strokeLinecap="round" className="animate-pulse" />
-              </g>
-            )}
-
-            {/* Chest Logo: > _ */}
-            <path d="M 45 70 L 48 72 L 45 74" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.85" />
-            <line x1="51" y1="74" x2="55" y2="74" stroke="#ffffff" strokeWidth="1.4" strokeLinecap="round" opacity="0.85" />
-          </svg>
-
-          {/* Mini Status Badge Indicator */}
-          <div className="absolute -bottom-0.5 right-1">
-            {petMood === "angry" ? (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[8px] text-white shadow ring-2 ring-background">
-                💢
-              </span>
-            ) : petMood === "jealous" ? (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 text-[8px] text-white shadow ring-2 ring-background">
-                😤
-              </span>
-            ) : (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[8px] text-white shadow ring-2 ring-background">
-                ⚡
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Floating Mini Controls Pill (Image 2 style) */}
-        <div className="mt-1.5 flex items-center gap-1.5 bg-card/90 border border-border/80 px-2.5 py-1 rounded-full shadow-2xl backdrop-blur-md">
-          <div className="flex items-center gap-1 pr-1 border-r border-border/60">
-            <Timer className="w-3 h-3 text-primary" />
-            <span className="font-mono text-[11px] font-bold tracking-tight">{timeFormatted}</span>
-          </div>
-
-          <div className="flex items-center gap-0.5">
-            {/* Squad Rivalry Prompt */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-5 w-5 rounded-full text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
-              onClick={triggerSquadJealousy}
-              title="Squad Peer Check"
-            >
-              <Users className="h-2.5 w-2.5" />
-            </Button>
-
-            {/* Sound toggle */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-5 w-5 rounded-full text-muted-foreground hover:text-foreground"
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              title={soundEnabled ? "Mute Slap Sound" : "Enable Slap Sound"}
-            >
-              {soundEnabled ? <Volume2 className="h-2.5 w-2.5" /> : <VolumeX className="h-2.5 w-2.5" />}
-            </Button>
-
-            {/* Pause/Resume */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-5 w-5 rounded-full"
-              onClick={isActive ? pauseFocus : resumeFocus}
-              title={isActive ? "Pause Focus" : "Resume Focus"}
-            >
-              {isActive ? <Pause className="h-2.5 w-2.5" /> : <Play className="h-2.5 w-2.5 text-emerald-400" />}
-            </Button>
-
-            {/* Hide / Dismiss */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-5 w-5 rounded-full text-destructive hover:bg-destructive/10"
-              onClick={togglePetEnabled}
-              title="Hide Pet"
-            >
-              <X className="h-2.5 w-2.5" />
-            </Button>
-          </div>
-        </div>
-
-        {distractionCount > 0 && (
-          <span className="mt-1 text-[9px] text-muted-foreground/80 font-mono">
-            {distractionCount} slap{distractionCount > 1 ? "s" : ""}
-          </span>
-        )}
+        {mascotBody}
       </aside>
     </>
   );
