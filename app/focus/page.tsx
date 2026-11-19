@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users } from "lucide-react";
+import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users, Sparkles, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useLuminaStore } from "@/hooks/use-lumina-store";
 import {
   calculateDecayedDebt,
   applySwitchPenalty,
@@ -20,8 +21,18 @@ import { TaskSwitchTimeline } from "@/components/focus/task-switch-timeline";
 import { StudySquads } from "@/components/focus/study-squads";
 
 export default function FocusPage() {
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
-  const [isActive, setIsActive] = useState(false);
+  const { 
+    focusSession, 
+    startFocus, 
+    pauseFocus, 
+    resumeFocus, 
+    stopFocus, 
+    recordDistraction, 
+    setPetMood 
+  } = useLuminaStore();
+
+  const [timeLeft, setTimeLeft] = useState(focusSession.timeLeft || 25 * 60);
+  const [isActive, setIsActive] = useState(focusSession.isActive);
   const [mode, setMode] = useState<"focus" | "break">("focus");
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
 
@@ -34,6 +45,11 @@ export default function FocusPage() {
 
   const focusScore = debtToFocusScore(cognitiveDebt);
   const flowState = getFlowState(focusScore);
+
+  // Sync state with global store
+  useEffect(() => {
+    setIsActive(focusSession.isActive);
+  }, [focusSession.isActive]);
 
   // Timer Tick & Exponential Decay Loop
   useEffect(() => {
@@ -83,7 +99,7 @@ export default function FocusPage() {
         };
         setTimelineEvents((prev) => [...prev, newEvent]);
 
-        toast.error("ContextSwitch: 'You said you were studying. Your phone disagrees.'", {
+        toast.error("ContextSwitch: 'You said you were studying. Your screen disagrees.'", {
           description: `+${penaltyApplied} Cognitive Debt penalty applied. Stay focused!`,
         });
       } else {
@@ -114,6 +130,7 @@ export default function FocusPage() {
 
   const handleTimerComplete = () => {
     setIsActive(false);
+    stopFocus();
     if (mode === "focus") {
       setSessionsCompleted((prev) => prev + 1);
       toast.success("Focus block complete! Cognitive debt reduced.");
@@ -130,14 +147,23 @@ export default function FocusPage() {
     if (!isActive) {
       sessionStartRef.current = Date.now();
       lastFocusStretchRef.current = Date.now();
+      if (!focusSession.isActive) {
+        startFocus(Math.round(timeLeft / 60) || 25);
+      } else {
+        resumeFocus();
+      }
+      setIsActive(true);
+    } else {
+      pauseFocus();
+      setIsActive(false);
     }
-    setIsActive(!isActive);
   };
 
   const resetTimer = () => {
     setIsActive(false);
     setMode("focus");
     setTimeLeft(25 * 60);
+    stopFocus();
   };
 
   const formatTime = (seconds: number) => {
@@ -253,6 +279,42 @@ export default function FocusPage() {
                   Every rapid tab switch or screen interruption adds an immediate <strong>+15 debt penalty</strong>.
                   Sustained uninterrupted study cuts accumulated debt in half every <strong>3 minutes</strong>.
                 </p>
+              </div>
+
+              {/* Study Demon Companion Banner */}
+              <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 text-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    Study Demon Companion: Kiko
+                  </span>
+                  <Badge variant="outline" className="text-[10px]">
+                    {focusSession.isActive ? "Active Guardian" : "Idle"}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground text-[11px] leading-relaxed">
+                  When Focus is turned on, Kiko floats across every screen in Lumina. He gets angry and slaps your screen if you switch away, praises deep flow, and fuels competitive jealousy against your Study Squad.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-[11px] text-destructive border-destructive/30 hover:bg-destructive/10"
+                    onClick={() => recordDistraction("TEST SLAP: Put the phone down and study! 😾💥")}
+                  >
+                    Test Slap Reaction 💥
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-[11px] text-purple-600 dark:text-purple-400 border-purple-500/30 hover:bg-purple-500/10"
+                    onClick={() => {
+                      setPetMood("jealous", "Meanwhile, Priya has been locked in for 45 mins. Don't let her beat you! 😤");
+                    }}
+                  >
+                    Squad Jealousy 😤
+                  </Button>
+                </div>
               </div>
             </div>
 

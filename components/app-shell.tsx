@@ -7,6 +7,7 @@ import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 import { BatteryGuardianIndicator } from "@/components/battery/battery-guardian-indicator"
 import { ProfileSettingsDialog } from "@/components/settings/profile-settings-dialog"
+import { FocusPetCompanion } from "@/components/focus/focus-pet-companion"
 import { useLuminaStore } from "@/hooks/use-lumina-store"
 import {
   LayoutDashboard,
@@ -288,6 +289,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1">
         {children}
       </main>
+
+      {/* Floating Interactive Focus Pet Companion */}
+      <FocusPetCompanion />
     </div>
   )
 }
