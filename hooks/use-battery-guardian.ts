@@ -35,7 +35,7 @@ export function useBatteryGuardian() {
             priority: "high",
             projectName: "Lumina Core Sync",
             phase: "Phase 8: Guardian Final Sync",
-            assignee: { name: "Vatsal & Renee", avatar: "VR" },
+            assignee: { name: "You (Battery Guardian)", avatar: "🔋" },
           }),
         });
       } catch (err) {

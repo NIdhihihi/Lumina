@@ -10,8 +10,8 @@
     "projectName": "Digital Systems Lab",
     "phase": "Phase 2: Logic Synthesis",
     "assignee": {
-      "name": "Renee",
-      "avatar": "👩‍💻"
+      "name": "You",
+      "avatar": "👤"
     }
   },
   {
@@ -24,7 +24,7 @@
     "projectName": "Digital Systems Lab",
     "phase": "Phase 2: Logic Synthesis",
     "assignee": {
-      "name": "Vatsal",
+      "name": "Alex",
       "avatar": "👨‍💻"
     }
   },
@@ -39,8 +39,8 @@
     "projectName": "Coursework Sprint",
     "phase": "Sprint 3: Midterm Prep",
     "assignee": {
-      "name": "Renee",
-      "avatar": "👩‍💻"
+      "name": "You",
+      "avatar": "👤"
     }
   },
   {
@@ -68,7 +68,7 @@
     "projectName": "SE Project Phase 2",
     "phase": "Phase 2: Code Review",
     "assignee": {
-      "name": "Vatsal",
+      "name": "Alex",
       "avatar": "👨‍💻"
     }
   },
@@ -82,8 +82,8 @@
     "projectName": "Digital Systems Lab",
     "phase": "Phase 1: Architecture",
     "assignee": {
-      "name": "Renee",
-      "avatar": "👩‍💻"
+      "name": "You",
+      "avatar": "👤"
     }
   }
 ]

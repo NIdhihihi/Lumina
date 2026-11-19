@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   ExternalLink,
@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   Users,
   Code2,
-  ZoomIn,
+  Settings,
   MessageSquareQuote,
   Sparkles,
 } from "lucide-react";
@@ -23,16 +23,33 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useLuminaStore } from "@/hooks/use-lumina-store";
 import { toast } from "sonner";
 
 interface OverleafPreviewProps {
   className?: string;
 }
 
+interface OverleafProjectConfig {
+  title: string;
+  courseCode: string;
+  authors: string;
+  overleafUrl: string;
+}
+
+const DEFAULT_CONFIG: OverleafProjectConfig = {
+  title: "Design & Implementation of 4th-Order Butterworth IIR Filter",
+  courseCode: "EE301: Digital Signal Processing Lab",
+  authors: "Lead Author, Co-Author 1, Co-Author 2",
+  overleafUrl: "https://www.overleaf.com",
+};
+
 const SAMPLE_TEX_SOURCE = `% --------------------------------------------------------------
-% EE301: Digital Signal Processing Laboratory Report
-% Authors: Vatsal Shah, Renee Patel, Alex Chen
+% Academic Laboratory Report
 % --------------------------------------------------------------
 \\documentclass[10pt,journal,compsoc]{IEEEtran}
 \\usepackage{amsmath,amssymb,amsfonts}
@@ -41,7 +58,6 @@ const SAMPLE_TEX_SOURCE = `% ---------------------------------------------------
 
 \\begin{document}
 \\title{Design, Frequency Response Analysis and Discretization of 4th-Order Butterworth IIR Filter}
-\\author{Vatsal~Shah, Renee~Patel, and Alex~Chen}
 \\maketitle
 
 \\begin{abstract}
@@ -63,11 +79,46 @@ Measurements obtained via DSO agree with numerical simulation within 2.4\\% erro
 \\end{document}`;
 
 export function OverleafPreview({ className }: OverleafPreviewProps) {
+  const { profile } = useLuminaStore();
   const [activeTab, setActiveTab] = useState<"compiled" | "source">("compiled");
   const [isCompiling, setIsCompiling] = useState(false);
   const [lastCompiled, setLastCompiled] = useState("3m ago");
   const [mobileModalOpen, setMobileModalOpen] = useState(false);
-  const [reviewStatus, setReviewStatus] = useState<string | null>("Approved by Renee ✅");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [reviewStatus, setReviewStatus] = useState<string | null>("Approved by Team ✅");
+
+  const [projectConfig, setProjectConfig] = useState<OverleafProjectConfig>({
+    ...DEFAULT_CONFIG,
+    authors: `${profile.name || "Student"} (Lead), Lab Partner 1, Lab Partner 2`,
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("lumina_overleaf_config");
+      if (stored) {
+        try {
+          setProjectConfig(JSON.parse(stored));
+          return;
+        } catch {
+          // ignore
+        }
+      }
+    }
+    if (profile.name && profile.name !== "Student") {
+      setProjectConfig((prev) => ({
+        ...prev,
+        authors: `${profile.name} (Lead), Lab Partner 1, Lab Partner 2`,
+      }));
+    }
+  }, [profile.name]);
+
+  const handleSaveConfig = () => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lumina_overleaf_config", JSON.stringify(projectConfig));
+    }
+    toast.success("Overleaf project settings saved!");
+    setSettingsOpen(false);
+  };
 
   const handleRecompile = () => {
     setIsCompiling(true);
@@ -98,7 +149,7 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
               </Badge>
             </div>
             <CardDescription className="text-xs mt-0.5">
-              Vatsal&apos;s Lab Report #4 • Compiled {lastCompiled} • Overleaf v2 Webhook
+              {projectConfig.courseCode} • Compiled {lastCompiled} • Overleaf Sync
             </CardDescription>
           </div>
 
@@ -125,13 +176,24 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
             </Button>
 
             <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs px-2 gap-1"
+              onClick={() => setSettingsOpen(true)}
+              title="Edit Report Settings"
+            >
+              <Settings className="w-3 h-3 text-muted-foreground" />
+              Configure
+            </Button>
+
+            <Button
               variant="ghost"
               size="sm"
               className="h-7 text-xs px-2 gap-1"
               asChild
             >
               <a
-                href="https://www.overleaf.com"
+                href={projectConfig.overleafUrl}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -144,14 +206,14 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
 
         {/* Co-Authors Bar */}
         <div className="flex items-center justify-between pt-2 border-t text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-primary" />
-            <span>
-              <strong>Authors:</strong> Vatsal Shah (Lead), Renee Patel, Alex Chen
+          <div className="flex items-center gap-1.5 truncate mr-2">
+            <Users className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="truncate">
+              <strong>Authors:</strong> {projectConfig.authors}
             </span>
           </div>
           {reviewStatus && (
-            <Badge variant="secondary" className="text-[10px] py-0 px-2">
+            <Badge variant="secondary" className="text-[10px] py-0 px-2 shrink-0">
               {reviewStatus}
             </Badge>
           )}
@@ -170,8 +232,8 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
                 LaTeX Source
               </TabsTrigger>
             </TabsList>
-            <span className="text-[11px] text-muted-foreground font-mono">
-              EE301_DSP_Lab_Report_4.pdf
+            <span className="text-[11px] text-muted-foreground font-mono truncate max-w-[200px]">
+              {projectConfig.courseCode.replace(/[^a-zA-Z0-9]/g, "_")}.pdf
             </span>
           </div>
 
@@ -181,13 +243,13 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
               {/* Document Header */}
               <div className="text-center border-b pb-3 space-y-1">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-sans">
-                  IEEE Transactions on Signal Processing • Student Laboratory Series
+                  {projectConfig.courseCode} • Laboratory Series
                 </p>
                 <h3 className="font-bold text-base leading-tight font-sans">
-                  Design, Frequency Response Analysis and Discretization of 4th-Order Butterworth IIR Filter
+                  {projectConfig.title}
                 </h3>
                 <p className="text-xs text-muted-foreground font-sans">
-                  Vatsal Shah, Renee Patel, Alex Chen — Department of Electrical Engineering
+                  {projectConfig.authors} — {profile.college || "Engineering Institute"}
                 </p>
               </div>
 
@@ -248,7 +310,7 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
               <div className="pt-2 flex items-center justify-between text-[11px] text-muted-foreground font-sans">
                 <span className="flex items-center gap-1 text-emerald-500 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  All 4 Bode plots verified & signed off
+                  All lab report sections verified & ready for review
                 </span>
                 <span className="text-muted-foreground">Page 1 of 4</span>
               </div>
@@ -264,27 +326,89 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
         </Tabs>
       </CardContent>
 
+      {/* Edit Project Settings Dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-primary" />
+              Configure Overleaf Project
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Link your group&apos;s real lab report and customize the author names.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="space-y-1">
+              <Label className="text-xs">Report Title</Label>
+              <Input
+                value={projectConfig.title}
+                onChange={(e) => setProjectConfig({ ...projectConfig, title: e.target.value })}
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Course Code / Subject</Label>
+              <Input
+                value={projectConfig.courseCode}
+                onChange={(e) => setProjectConfig({ ...projectConfig, courseCode: e.target.value })}
+                placeholder="e.g. CS302: Operating Systems Lab"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Co-Authors / Teammates</Label>
+              <Input
+                value={projectConfig.authors}
+                onChange={(e) => setProjectConfig({ ...projectConfig, authors: e.target.value })}
+                placeholder="e.g. You, Partner 1, Partner 2"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Overleaf Project URL</Label>
+              <Input
+                value={projectConfig.overleafUrl}
+                onChange={(e) => setProjectConfig({ ...projectConfig, overleafUrl: e.target.value })}
+                placeholder="https://www.overleaf.com/project/..."
+                className="h-8 text-sm"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(false)}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleSaveConfig}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Mobile Review Full-Screen Dialog */}
       <Dialog open={mobileModalOpen} onOpenChange={setMobileModalOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Smartphone className="w-5 h-5 text-primary" />
-              Quick Mobile Review Mode (Vatsal & Team)
+              Quick Mobile Review Mode
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Optimized compact preview for reviewing on the go between lectures.
+              Optimized compact preview for reviewing lab submissions on the go between lectures.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-2">
             <div className="p-3 rounded-lg bg-accent/40 border space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-primary">Lab Report #4 (DSP IIR Filter)</span>
+                <span className="font-semibold text-primary">{projectConfig.title}</span>
                 <Badge variant="outline" className="text-[10px]">v2.4 Compiled</Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                Passband ripple within 0.2 dB. All measurements cross-referenced with oscilloscope traces.
+                Authors: {projectConfig.authors}
               </p>
             </div>
 
@@ -298,7 +422,7 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
                   variant="outline"
                   size="sm"
                   className="text-xs justify-start text-emerald-500 border-emerald-500/30 hover:border-emerald-500"
-                  onClick={() => handleAddReviewComment("Approved to submit by Vatsal ✅")}
+                  onClick={() => handleAddReviewComment(`Approved by ${profile.name || "Student"} ✅`)}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
                   Approve for Submission
@@ -307,7 +431,7 @@ export function OverleafPreview({ className }: OverleafPreviewProps) {
                   variant="outline"
                   size="sm"
                   className="text-xs justify-start text-amber-500 border-amber-500/30 hover:border-amber-500"
-                  onClick={() => handleAddReviewComment("Review Section II Table 2 📝")}
+                  onClick={() => handleAddReviewComment("Review Section II Measurements 📝")}
                 >
                   <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                   Request Minor Edits

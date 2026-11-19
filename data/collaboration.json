@@ -2,16 +2,16 @@
   "messages": [
     {
       "id": "msg-1",
-      "senderId": "vatsal",
-      "senderName": "Vatsal",
+      "senderId": "alex",
+      "senderName": "Alex",
       "senderAvatar": "👨‍💻",
-      "content": "Hey Renee, did you finish the truth table for the 4-bit ALU lab report?",
+      "content": "Hey squad, did you review the truth table for the lab report?",
       "timestamp": "2026-11-17T20:15:00.000Z"
     },
     {
       "id": "msg-2",
-      "senderId": "renee",
-      "senderName": "Renee",
+      "senderId": "sam",
+      "senderName": "Sam",
       "senderAvatar": "👩‍💻",
       "content": "Just sketched the half-adder and XOR logic gate circuit on the whiteboard. Check the pinned board!",
       "timestamp": "2026-11-17T20:18:00.000Z",
@@ -22,7 +22,7 @@
       "id": "msg-3",
       "senderId": "priya",
       "senderName": "Priya",
-      "senderAvatar": "🐼",
+      "senderAvatar": "👩‍💻",
       "content": "I dropped the Verilog module into our live pasteboard. You guys can edit it together directly.",
       "timestamp": "2026-11-17T20:22:00.000Z",
       "pinnedType": "code",

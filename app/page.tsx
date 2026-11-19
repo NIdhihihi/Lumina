@@ -12,7 +12,7 @@ import { AIRecommendationWidget } from "@/components/dashboard/ai-recommendation
 import { OverleafPreview } from "@/components/dashboard/overleaf-preview";
 
 export default function Dashboard() {
-  const { fetchNotes, fetchAttendance, fetchExpenses, fetchTasks, fetchTimetable } = useLuminaStore();
+  const { profile, fetchNotes, fetchAttendance, fetchExpenses, fetchTasks, fetchTimetable } = useLuminaStore();
 
   useEffect(() => {
     fetchNotes();
@@ -25,7 +25,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Welcome back, Student</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Welcome back, {profile.name || "Student"}</h2>
         <p className="text-muted-foreground">Here's what's happening today.</p>
       </div>
 

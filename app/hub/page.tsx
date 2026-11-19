@@ -8,11 +8,14 @@ import { Button } from "@/components/ui/button";
 import { GroupChat, type ChatMessage } from "@/components/collaboration/group-chat";
 import { Whiteboard, type GateNode } from "@/components/collaboration/whiteboard";
 import { Pasteboard, type PasteboardSnippet } from "@/components/collaboration/pasteboard";
+import { useLuminaStore } from "@/hooks/use-lumina-store";
 import { toast } from "sonner";
 
 export default function DiscussionHubPage() {
+  const { profile } = useLuminaStore();
+  const primaryName = profile.name || "You";
   const [activeTab, setActiveTab] = useState<"chat" | "whiteboard" | "pasteboard">("chat");
-  const [currentUser, setCurrentUser] = useState("Renee");
+  const [currentUser, setCurrentUser] = useState(primaryName);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [whiteboardGates, setWhiteboardGates] = useState<GateNode[]>([]);
   const [pinnedSnippet, setPinnedSnippet] = useState<PasteboardSnippet | null>(null);
@@ -175,6 +178,7 @@ export default function DiscussionHubPage() {
             onSendMessage={handleSendMessage}
             onSelectTab={setActiveTab}
             currentUser={currentUser}
+            primaryUserName={primaryName}
             onSwitchUser={(user) => setCurrentUser(user)}
           />
         </TabsContent>

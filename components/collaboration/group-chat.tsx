@@ -35,6 +35,7 @@ interface GroupChatProps {
   onSelectTab: (tab: "chat" | "whiteboard" | "pasteboard") => void;
   currentUser: string;
   onSwitchUser: (userName: string, avatar: string) => void;
+  primaryUserName?: string;
 }
 
 export function GroupChat({
@@ -44,6 +45,7 @@ export function GroupChat({
   onSelectTab,
   currentUser,
   onSwitchUser,
+  primaryUserName = "You",
 }: GroupChatProps) {
   const [inputText, setInputText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -57,7 +59,7 @@ export function GroupChat({
   const handleSend = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!inputText.trim()) return;
-    const avatar = currentUser === "Renee" ? "👩‍💻" : currentUser === "Vatsal" ? "👨‍💻" : "🐼";
+    const avatar = currentUser === primaryUserName ? "👤" : currentUser === "Alex" ? "👨‍💻" : "👩‍💻";
     onSendMessage(inputText.trim(), currentUser, avatar);
     setInputText("");
   };
@@ -75,32 +77,32 @@ export function GroupChat({
           </CardDescription>
         </div>
 
-        {/* User Identity Switcher (Renee / Vatsal / Priya) */}
+        {/* Dynamic User Identity Switcher */}
         <div className="flex items-center gap-1.5 bg-accent/40 p-1 rounded-lg text-xs">
           <span className="text-[10px] text-muted-foreground mr-1">Chatting as:</span>
           <button
-            onClick={() => onSwitchUser("Renee", "👩‍💻")}
+            onClick={() => onSwitchUser(primaryUserName, "👤")}
             className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all ${
-              currentUser === "Renee" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              currentUser === primaryUserName ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            👩‍💻 Renee
+            👤 {primaryUserName}
           </button>
           <button
-            onClick={() => onSwitchUser("Vatsal", "👨‍💻")}
+            onClick={() => onSwitchUser("Alex", "👨‍💻")}
             className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all ${
-              currentUser === "Vatsal" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+              currentUser === "Alex" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            👨‍💻 Vatsal
+            👨‍💻 Alex
           </button>
           <button
-            onClick={() => onSwitchUser("Priya", "🐼")}
+            onClick={() => onSwitchUser("Priya", "👩‍💻")}
             className={`px-2 py-0.5 rounded text-[11px] font-semibold transition-all ${
               currentUser === "Priya" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            🐼 Priya
+            👩‍💻 Priya
           </button>
         </div>
       </CardHeader>

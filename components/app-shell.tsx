@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 import { BatteryGuardianIndicator } from "@/components/battery/battery-guardian-indicator"
+import { ProfileSettingsDialog } from "@/components/settings/profile-settings-dialog"
+import { useLuminaStore } from "@/hooks/use-lumina-store"
 import {
   LayoutDashboard,
   Calendar,
@@ -54,23 +56,34 @@ const navigation = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { theme, setTheme, resolvedTheme } = useTheme()
+  const { profile, updateProfile } = useLuminaStore()
   const [mounted, setMounted] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(true) // Default logged in for demo
+  const [isLoggedIn, setIsLoggedIn] = useState(true)
   const [showLoginDialog, setShowLoginDialog] = useState(false)
+  const [showProfileDialog, setShowProfileDialog] = useState(false)
   const [loginEmail, setLoginEmail] = useState("")
   const [loginPassword, setLoginPassword] = useState("")
-  const [userName, setUserName] = useState("John Smith")
 
-  // Prevent hydration mismatch
+  // Load profile from localStorage on client mount
   useEffect(() => {
     setMounted(true)
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("lumina_student_profile")
+      if (stored) {
+        try {
+          updateProfile(JSON.parse(stored))
+        } catch {
+          // ignore
+        }
+      }
+    }
   }, [])
 
   const handleLogin = () => {
     if (loginEmail && loginPassword) {
       setIsLoggedIn(true)
-      setUserName(loginEmail.split("@")[0])
+      updateProfile({ name: loginEmail.split("@")[0], email: loginEmail })
       setShowLoginDialog(false)
       setLoginEmail("")
       setLoginPassword("")
@@ -79,7 +92,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     setIsLoggedIn(false)
-    setUserName("")
   }
 
   return (
@@ -188,26 +200,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 px-2">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xs font-medium text-primary-foreground">
-                      {userName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-xs font-bold text-primary-foreground">
+                      {(profile.name || "S").slice(0, 2).toUpperCase()}
                     </div>
-                    <span className="text-sm font-medium hidden sm:inline-block">{userName}</span>
+                    <span className="text-sm font-medium hidden sm:inline-block">{profile.name}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{userName}</p>
-                      <p className="text-xs text-muted-foreground">{userName.toLowerCase().replace(" ", ".")}@university.edu</p>
+                      <p className="text-sm font-medium">{profile.name}</p>
+                      <p className="text-xs text-muted-foreground">{profile.email || `${profile.name.toLowerCase().replace(/\s+/g, ".")}@university.edu`}</p>
+                      <p className="text-[10px] text-primary">{profile.branch} • {profile.semester}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowProfileDialog(true)} className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
-                    Profile
+                    Edit Profile & Data
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </DropdownMenuItem>
@@ -222,6 +235,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
+
+      {/* Profile & Data Management Dialog */}
+      <ProfileSettingsDialog open={showProfileDialog} onOpenChange={setShowProfileDialog} />
 
       {/* Login Dialog */}
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
