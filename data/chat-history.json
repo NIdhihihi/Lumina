@@ -1,0 +1,57 @@
+[
+  {
+    "id": "1795097355782",
+    "prompt": "Explain the Pumping Lemma from my TOC notes",
+    "response": "🛡️ **Offline Second Brain (TensorFlow.js RAG)**\n\nFrom your local textbook/notes **Hopcroft_TOC_Chapter_4.pdf** (Page 126):\n\n> \"Chapter 4: Properties of Regular Languages and the Pumping Lemma.\n\nThe Pumping Lemma states: If L is a regular language, then there exists a pumping length p >= 1 such that any string w in L with length |w| >= p can be decomposed as w = xyz satisfying: (1) |y| > 0, (2) |xy| <= p,\"\n\n📍 *Source: Hopcroft_TOC_Chapter_4.pdf, approx. Page 126 (Processed 100% on-device via local vector DB).*",
+    "timestamp": "2026-11-19T14:09:15.782Z",
+    "intent": "document",
+    "sources": [
+      {
+        "noteId": "2",
+        "noteTitle": "Theory of Computation & Automata (Hopcroft)",
+        "attachmentName": "Hopcroft_TOC_Chapter_4.pdf",
+        "approxPage": 126,
+        "snippet": "Chapter 4: Properties of Regular Languages and the Pumping Lemma.\n\nThe Pumping Lemma states: If L is a regular language, then there exists a pumping length p >= 1 such that any string w in L with length |w| >= p can be decomposed as w = xyz satisfying: (1) |y| > 0, (2) |xy| <= p,"
+      },
+      {
+        "noteId": "2",
+        "noteTitle": "Theory of Computation & Automata (Hopcroft)",
+        "snippet": "Pumping lemma, regular languages, and NFA to DFA conversion textbook notes."
+      },
+      {
+        "noteId": "3",
+        "noteTitle": "Digital Logic & Computer Design (Mano)",
+        "attachmentName": "Mano_Digital_Design_K_Maps.pdf",
+        "approxPage": 78,
+        "snippet": "Chapter 3: Gate-Level Minimization and Karnaugh Maps.\n\nA Karnaugh map (K-map) is a pictorial method used to minimize Boolean algebraic expressions. Cells are arranged such that adjacent cells differ by only one bit according to Gray code ordering (00, 01, 11, 10). Minterms are co"
+      },
+      {
+        "noteId": "3",
+        "noteTitle": "Digital Logic & Computer Design (Mano)",
+        "snippet": "Boolean algebra simplification, Karnaugh Maps (K-Maps), and universal logic gates."
+      }
+    ],
+    "aiUnavailable": false
+  },
+  {
+    "id": "1795097367360",
+    "prompt": "Can I miss tomorrow's TOC lecture?",
+    "response": "🛡️ **Offline Attendance Analytics (Basement Shield)**\n\n• **Subject**: Theory of Computation\n• **Current Attendance**: 80% (Requirement: 75%)\n• **Bunk Analytics**: You can safely miss **2** more classes while staying above 75%.\n• **Risk Status**: SAFE",
+    "timestamp": "2026-11-19T14:09:27.360Z",
+    "intent": "attendance",
+    "sources": [],
+    "aiUnavailable": false,
+    "toolData": {
+      "subject": "Theory of Computation",
+      "subjectId": "1",
+      "currentPercent": 80,
+      "projectedPercent": 77.8,
+      "missingClasses": 1,
+      "classesOnSelectedDay": 0,
+      "safeBunksRemaining": 2,
+      "classesNeededForTarget": 0,
+      "riskLevel": "safe",
+      "threshold": 75
+    }
+  }
+]
