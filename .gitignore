@@ -37,5 +37,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+# editor & scratch
+.vscode/
+scratch/
+
 # legacy
 .lumina-data

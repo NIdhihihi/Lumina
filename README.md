@@ -7,11 +7,13 @@ Lumina is a Next.js academic productivity app with a context-aware AI copilot. I
 1. Copy `.env.example` to `.env.local` and set your provider keys:
 
 ```bash
+# Optional cloud LLM (defaults to on-device offline Basement Shield if omitted)
 AI_PROVIDER=anthropic
 AI_API_KEY=your_key_here
 AI_MODEL=claude-sonnet-4-6
-EMBEDDING_PROVIDER=openai
-EMBEDDING_API_KEY=your_key_here
+
+# Embeddings run on-device via TensorFlow.js by default (100% offline & private)
+EMBEDDING_PROVIDER=local
 ```
 
 2. Install and run:
@@ -74,7 +76,7 @@ pnpm test
 ## RAG pipeline
 
 1. Notes (and attachment `textContent`) are chunked in `lib/ai/rag/chunking.ts`.
-2. Chunks are embedded via OpenAI embeddings by default (`EMBEDDING_PROVIDER=openai`).
+2. Chunks are embedded via on-device TensorFlow.js embeddings by default (`EMBEDDING_PROVIDER=local`), guaranteeing offline privacy in basement lecture halls. Cloud OpenAI embeddings can optionally be configured via `EMBEDDING_PROVIDER=openai`.
 3. Vectors persist to `data/vectors.json`.
 4. Queries embed the user message, rank chunks by cosine similarity, and wrap retrieved text in `<<<RETRIEVED_DOCUMENT_CONTENT>>>` delimiters with injection-pattern filtering.
 

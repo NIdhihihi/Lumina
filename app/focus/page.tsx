@@ -189,7 +189,7 @@ export default function FocusPage() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">ContextSwitch & Focus Engine</h2>
           <p className="text-muted-foreground">
-            Monitors real-time task switching and calculates Cognitive Debt via exponential decay.
+            Tracks tab switches and study blocks to help you stay focused.
           </p>
         </div>
 

@@ -17,8 +17,8 @@ const ANGRY_SLAP_LINES = [
 const PRAISE_LINES = [
   "Flow state unlocked! Let's get that 9.0 CGPA 🔥",
   "You're actually cooking right now. Keep this momentum! 🚀",
-  "Unbroken focus stretch! Your future self is thanking you 🎓",
-  "Deep work mode active. Pure engineering wizardry ✨",
+  "Clean focus stretch. Keep this pace going 🎓",
+  "45 minutes unbroken. Solid focus block ✨",
 ];
 
 const JEALOUS_SQUAD_LINES = [
@@ -29,9 +29,9 @@ const JEALOUS_SQUAD_LINES = [
 ];
 
 const CELEBRATION_LINES = [
-  "BOOM! Focus session conquered! You earned this break 🎉",
-  "Timer hit zero! 100% mission accomplished. Take a walk! 🥳",
-  "Top tier session! +50 brownie points secured! 🌟",
+  "Session finished! 25 minutes logged. Step away and take a break 🎉",
+  "Timer hit zero! Mission accomplished. Take a walk! 🥳",
+  "Top tier session! Focus block secured! 🌟",
 ];
 
 const POKE_LINES = [

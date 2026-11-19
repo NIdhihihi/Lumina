@@ -56,12 +56,6 @@ const COLUMNS = [
   },
 ];
 
-const TEAM_MEMBERS = [
-  { name: "Renee", avatar: "👩‍💻" },
-  { name: "Vatsal", avatar: "👨‍💻" },
-  { name: "Priya", avatar: "🐼" },
-];
-
 const DEFAULT_PROJECTS = [
   "Digital Systems Lab",
   "SE Project Phase 2",
@@ -69,7 +63,17 @@ const DEFAULT_PROJECTS = [
 ];
 
 export default function TasksPage() {
-  const { tasks, fetchTasks } = useLuminaStore();
+  const { tasks, fetchTasks, profile } = useLuminaStore();
+  const primaryName = profile.name || "You";
+
+  const teamMembers = [
+    { name: primaryName, avatar: "👤" },
+    ...[
+      { name: "Alex", avatar: "👨‍💻" },
+      { name: "Priya", avatar: "👩‍💻" },
+    ].filter((m) => m.name.toLowerCase() !== primaryName.toLowerCase()),
+  ];
+
   const [isAdding, setIsAdding] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string>("all");
   const [selectedMember, setSelectedMember] = useState<string>("all");
@@ -81,7 +85,7 @@ export default function TasksPage() {
     priority: "medium" as "low" | "medium" | "high",
     projectName: "Digital Systems Lab",
     phase: "Phase 2: Logic Synthesis",
-    assigneeName: "Renee",
+    assigneeName: primaryName,
     dueDate: "",
   });
 
@@ -90,6 +94,19 @@ export default function TasksPage() {
   }, []);
 
   const safeTasks: Task[] = Array.isArray(tasks) ? tasks : [];
+
+  // Build unique assignee options from both team roster and existing task records
+  const filterAssigneeMap = new Map<string, string>();
+  teamMembers.forEach((m) => filterAssigneeMap.set(m.name, m.avatar));
+  safeTasks.forEach((t) => {
+    if (t.assignee?.name && !filterAssigneeMap.has(t.assignee.name)) {
+      filterAssigneeMap.set(t.assignee.name, t.assignee.avatar || "👤");
+    }
+  });
+  const filterAssigneeOptions = Array.from(filterAssigneeMap.entries()).map(([name, avatar]) => ({
+    name,
+    avatar,
+  }));
 
   // Filter tasks by project and assignee
   const filteredTasks = safeTasks.filter((t) => {
@@ -113,9 +130,9 @@ export default function TasksPage() {
   const handleAddTask = async () => {
     if (!newTask.title.trim()) return;
 
-    const assignee = TEAM_MEMBERS.find((m) => m.name === newTask.assigneeName) || {
-      name: "Renee",
-      avatar: "👩‍💻",
+    const assignee = teamMembers.find((m) => m.name === newTask.assigneeName) || {
+      name: primaryName,
+      avatar: "👤",
     };
 
     const taskPayload = {
@@ -306,7 +323,7 @@ export default function TasksPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {TEAM_MEMBERS.map((m) => (
+                      {teamMembers.map((m) => (
                         <SelectItem key={m.name} value={m.name}>
                           {m.avatar} {m.name}
                         </SelectItem>
@@ -376,7 +393,7 @@ export default function TasksPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Assignees</SelectItem>
-                {TEAM_MEMBERS.map((m) => (
+                {filterAssigneeOptions.map((m) => (
                   <SelectItem key={m.name} value={m.name}>
                     {m.avatar} {m.name}
                   </SelectItem>

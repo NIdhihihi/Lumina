@@ -17,9 +17,11 @@ export function AIRecommendationWidget() {
     .filter((item) => item.percent < 75)
     .sort((a, b) => a.percent - b.percent)[0];
 
-  const recommendation = risky
+  const recommendation = subjects.length === 0
+    ? "No attendance data recorded yet. Upload a timetable or add subjects to track attendance."
+    : risky
     ? `${risky.subject.name} is at ${risky.percent}% attendance. Ask the copilot before skipping classes.`
-    : "Attendance looks healthy. Use AI Study to plan for upcoming exams.";
+    : "Attendance is above 75% across all courses. No critical attendance risks.";
 
   return (
     <Card className="col-span-4 border-primary/20 bg-primary/5">

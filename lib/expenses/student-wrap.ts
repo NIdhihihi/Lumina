@@ -47,7 +47,7 @@ export function generateWeeklyStudentWrap(
         description: "Zero expenses recorded yet for this week.",
         colorClass: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
       },
-      wrapHighlight: "Log your first daily expense to unlock your student financial digest!",
+      wrapHighlight: "Log an expense to see your weekly spending breakdown.",
     };
   }
 

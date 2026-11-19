@@ -13,7 +13,7 @@ describe("Study Pet Companion reactions", () => {
     const reaction = getPetReaction("long_focus");
     expect(reaction.mood).toBe("happy");
     expect(reaction.action).toBe("sparkles");
-    expect(reaction.speech).toMatch(/(flow state|cooking|unbroken|wizardry)/i);
+    expect(reaction.speech).toMatch(/(flow state|cooking|clean focus|solid focus|unbroken)/i);
   });
 
   it("triggers squad rivalry jealousy reaction with member name", () => {

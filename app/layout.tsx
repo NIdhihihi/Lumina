@@ -8,8 +8,8 @@ import { FocusPetCompanion } from "@/components/focus/focus-pet-companion";
 const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Lumina - Student Intelligence Dashboard",
-  description: "An all-in-one student productivity OS",
+  title: "Lumina — Student Workspace",
+  description: "Local-first coursework, timetable, and study workspace.",
 };
 
 export default function RootLayout({
