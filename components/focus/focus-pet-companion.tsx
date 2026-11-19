@@ -1,13 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useTransition } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLuminaStore } from "@/hooks/use-lumina-store";
 import { getPetReaction, type PetMood } from "@/lib/focus/pet-companion";
 import { 
-  Sparkles, 
-  Flame, 
-  Smile, 
-  Zap, 
   X, 
   Minimize2, 
   Maximize2, 
@@ -184,19 +180,20 @@ export function FocusPetCompanion() {
     }
   }, [isScreenShaking]);
 
-  // If focus session is not active (and not celebrating) or pet is disabled, hide the pet
-  if (!isPetEnabled || (!isActive && petMood !== "celebrating")) {
-    return null;
-  }
+  // Draggable window event listener (must be called unconditionally before any early return)
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [isDragging]);
 
-  // Formatting mm:ss
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-  const timeFormatted = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-
-  // Draggable logic
+  // Draggable handlers
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Only drag from header or character body, not buttons
     if ((e.target as HTMLElement).closest("button")) return;
     setIsDragging(true);
     dragStartRef.current = {
@@ -221,17 +218,6 @@ export function FocusPetCompanion() {
     setIsDragging(false);
   };
 
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDragging]);
-
   const handlePoke = () => {
     const poke = getPetReaction("poke");
     setPetMood(poke.mood, poke.speech);
@@ -242,6 +228,17 @@ export function FocusPetCompanion() {
     setPetMood(rival.mood, rival.speech);
     if (soundEnabled) playWebAudioSound("slap");
   };
+
+  // If focus session is not active (and not celebrating) or pet is disabled, hide the pet
+  // (Placed AFTER all Hooks to strictly preserve React Hook execution order)
+  if (!isPetEnabled || (!isActive && petMood !== "celebrating")) {
+    return null;
+  }
+
+  // Formatting mm:ss
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const timeFormatted = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
   return (
     <>
