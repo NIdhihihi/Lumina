@@ -206,13 +206,22 @@ export function FocusPetCompanion() {
     };
   }, [petSpeech, petMood]);
 
-  // 7. Custom Document PiP Toggle Event Listener (triggers floating across laptop screen)
+  // 7. Custom Document PiP Toggle & Open Event Listeners
   useEffect(() => {
     const handleCustomPip = () => {
       togglePipWindow();
     };
+    const handleOpenPip = () => {
+      if (!pipContainer) {
+        togglePipWindow();
+      }
+    };
     window.addEventListener("lumina-toggle-pip", handleCustomPip);
-    return () => window.removeEventListener("lumina-toggle-pip", handleCustomPip);
+    window.addEventListener("lumina-open-pip", handleOpenPip);
+    return () => {
+      window.removeEventListener("lumina-toggle-pip", handleCustomPip);
+      window.removeEventListener("lumina-open-pip", handleOpenPip);
+    };
   }, [pipContainer]);
 
   // Draggable logic

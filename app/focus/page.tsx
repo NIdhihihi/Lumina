@@ -155,6 +155,11 @@ export default function FocusPage() {
         resumeFocus();
       }
       setIsActive(true);
+
+      // Auto-open floating mascot across laptop screen
+      if (typeof window !== "undefined" && "documentPictureInPicture" in window) {
+        window.dispatchEvent(new CustomEvent("lumina-open-pip"));
+      }
     } else {
       pauseFocus();
       setIsActive(false);
