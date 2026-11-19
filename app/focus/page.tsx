@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users } from "lucide-react";
+import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users, AppWindow } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -269,8 +269,8 @@ export default function FocusPage() {
                     </Button>
                   </div>
 
-                  {/* Pet Symbol Toggle Button */}
-                  <div className="flex justify-center items-center pt-1">
+                  {/* Pet Controls: On/Off & Always-on-top PiP */}
+                  <div className="flex flex-wrap justify-center items-center gap-2 pt-1">
                     <button
                       type="button"
                       onClick={togglePetEnabled}
@@ -284,6 +284,20 @@ export default function FocusPage() {
                     >
                       <span className="text-sm">🐱</span>
                       <span>Study Pet: <strong>{focusSession.isPetEnabled ? "ON" : "OFF"}</strong></span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== "undefined") {
+                          window.dispatchEvent(new CustomEvent("lumina-toggle-pip"));
+                        }
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
+                      title="Float pet in an always-on-top window over other tabs and laptop apps (Chrome/Edge)"
+                    >
+                      <AppWindow className="w-3.5 h-3.5" />
+                      <span>Float Over All Apps (Always on Top)</span>
                     </button>
                   </div>
 
