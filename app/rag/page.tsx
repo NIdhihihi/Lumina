@@ -223,9 +223,9 @@ function AIChatContent() {
             )}
           </div>
 
-          {/* Floating Jump to Latest Button */}
+          {/* Floating Jump to Latest Button - Centered right above the chat input */}
           {showScrollBottom && (
-            <div className="absolute bottom-3 right-5 z-10">
+            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
               <Button
                 variant="secondary"
                 size="sm"
@@ -233,10 +233,10 @@ function AIChatContent() {
                   userScrolledUp.current = false;
                   scrollToBottom(true);
                 }}
-                className="shadow-md text-xs h-7 px-2.5 gap-1.5 border bg-background/90 backdrop-blur hover:bg-accent"
+                className="shadow-lg rounded-full text-xs h-8 px-3.5 gap-2 border border-border/80 bg-background/95 backdrop-blur-md hover:bg-accent text-foreground hover:scale-105 transition-all animate-in fade-in slide-in-from-bottom-2"
               >
-                <ArrowDown className="w-3.5 h-3.5" />
-                Jump to latest
+                <ArrowDown className="w-3.5 h-3.5 text-primary animate-bounce" />
+                <span className="font-medium text-xs">Jump to latest</span>
               </Button>
             </div>
           )}
