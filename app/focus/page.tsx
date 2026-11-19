@@ -19,7 +19,6 @@ import {
 } from "@/lib/focus/cognitive-debt";
 import { TaskSwitchTimeline } from "@/components/focus/task-switch-timeline";
 import { StudySquads } from "@/components/focus/study-squads";
-import { openPetPipWindow, closePetPipWindow } from "@/lib/focus/pet-pip-manager";
 
 export default function FocusPage() {
   const { 
@@ -146,19 +145,11 @@ export default function FocusPage() {
     }
   };
 
-  const handleTogglePet = async () => {
-    if (focusSession.isPetEnabled) {
-      closePetPipWindow();
-      setPetEnabled(false);
-    } else {
-      setPetEnabled(true);
-      if (typeof window !== "undefined" && "documentPictureInPicture" in window) {
-        await openPetPipWindow();
-      }
-    }
+  const handleTogglePet = () => {
+    setPetEnabled(!focusSession.isPetEnabled);
   };
 
-  const toggleTimer = async () => {
+  const toggleTimer = () => {
     if (!isActive) {
       sessionStartRef.current = Date.now();
       lastFocusStretchRef.current = Date.now();
@@ -168,11 +159,6 @@ export default function FocusPage() {
         resumeFocus();
       }
       setIsActive(true);
-
-      // Auto-float mascot across laptop screen when pet is enabled
-      if (focusSession.isPetEnabled && typeof window !== "undefined" && "documentPictureInPicture" in window) {
-        await openPetPipWindow();
-      }
     } else {
       pauseFocus();
       setIsActive(false);
@@ -184,7 +170,6 @@ export default function FocusPage() {
     setMode("focus");
     setTimeLeft(25 * 60);
     stopFocus();
-    closePetPipWindow();
   };
 
   const formatTime = (seconds: number) => {

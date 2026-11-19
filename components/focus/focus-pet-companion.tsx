@@ -1,14 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { useLuminaStore } from "@/hooks/use-lumina-store";
 import { getPetReaction } from "@/lib/focus/pet-companion";
-import {
-  subscribeToPetPip,
-  openPetPipWindow,
-  closePetPipWindow,
-} from "@/lib/focus/pet-pip-manager";
 import { 
   X, 
   Pause, 
@@ -77,12 +71,11 @@ export function FocusPetCompanion() {
   const [position, setPosition] = useState({ x: 0, y: 0 }); // offset from bottom-right inside Lumina
   const [isDragging, setIsDragging] = useState(false);
   const [showSpeech, setShowSpeech] = useState(true);
-  const [pipContainer, setPipContainer] = useState<HTMLElement | null>(null);
 
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number }>({ x: 0, y: 0, posX: 0, posY: 0 });
   const speechTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { isActive, timeLeft, totalDuration, distractionCount, petMood, petSpeech, isPetEnabled } = focusSession;
+  const { isActive, timeLeft, totalDuration, petMood, petSpeech, isPetEnabled } = focusSession;
 
   // Formatting mm:ss
   const minutes = Math.floor(timeLeft / 60);
@@ -113,7 +106,6 @@ export function FocusPetCompanion() {
         if (soundEnabled) playWebAudioSound("chime");
         setTimeout(() => {
           stopFocus();
-          closePetPipWindow();
         }, 5000);
       }
     }, 1000);
@@ -178,7 +170,7 @@ export function FocusPetCompanion() {
     }
   }, [isScreenShaking]);
 
-  // 5. Draggable Mouse Listeners (when docked in Lumina)
+  // 5. Draggable Mouse Listeners
   useEffect(() => {
     if (isDragging) {
       window.addEventListener("mousemove", handleMouseMove);
@@ -204,15 +196,7 @@ export function FocusPetCompanion() {
     };
   }, [petSpeech, petMood]);
 
-  // 7. Subscribe to Document PiP Container
-  useEffect(() => {
-    const unsubscribe = subscribeToPetPip((container) => {
-      setPipContainer(container);
-    });
-    return unsubscribe;
-  }, []);
-
-  // Draggable logic for in-app mode
+  // Draggable logic for in-app floating companion
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
     setIsDragging(true);
@@ -238,15 +222,10 @@ export function FocusPetCompanion() {
     setIsDragging(false);
   };
 
-  const handlePoke = async () => {
+  const handlePoke = () => {
     const poke = getPetReaction("poke");
     setPetMood(poke.mood, poke.speech);
     setShowSpeech(true);
-
-    // If clicked while docked in Lumina, float out to accompany across the laptop
-    if (!pipContainer && typeof window !== "undefined" && "documentPictureInPicture" in window) {
-      await openPetPipWindow();
-    }
   };
 
   const triggerSquadJealousy = () => {
@@ -256,18 +235,17 @@ export function FocusPetCompanion() {
     if (soundEnabled) playWebAudioSound("slap");
   };
 
-  // Turn off pet: closes PiP window and sets pet to disabled
+  // Turn off pet: hides pet companion
   const handleTurnOffPet = () => {
-    closePetPipWindow();
     setPetEnabled(false);
   };
 
-  // Called strictly after all 17 hooks
+  // Called strictly after all hooks
   if (!isPetEnabled || (!isActive && petMood !== "celebrating")) {
     return null;
   }
 
-  // Mascot Visual Character & Capsule Pill (matching user's reference image exactly)
+  // Mascot Visual Character & Capsule Pill (Clean floating figure with no window border)
   const mascotBody = (
     <div className={`relative flex flex-col items-center select-none ${isSlapping ? "animate-shake" : ""}`}>
       {/* Floating Speech Bubble */}
@@ -317,10 +295,10 @@ export function FocusPetCompanion() {
         </div>
       )}
 
-      {/* Circular Mascot Avatar Container (Matching reference image) */}
+      {/* Circular Mascot Avatar Container (Clean floating figure matching reference image) */}
       <div 
         onClick={handlePoke}
-        className={`relative w-20 h-20 rounded-full bg-[#0d1527] border border-white/5 flex items-center justify-center shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer ${
+        className={`relative w-20 h-20 rounded-full bg-[#0d1527] border border-white/5 flex items-center justify-center shadow-2xl transition-transform hover:scale-105 active:scale-95 cursor-pointer ${
           petMood === "angry" ? "animate-bounce" : "animate-float"
         }`}
         title="Kiko Study Pet — Click to interact"
@@ -476,37 +454,21 @@ export function FocusPetCompanion() {
             {isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
           </button>
 
-          {/* Turn Off Pet / Close */}
+          {/* Turn Off Pet */}
           <button
             type="button"
             className="p-1 rounded-full text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
             onClick={handleTurnOffPet}
-            title="Turn Off Study Pet (Allows resource browsing)"
+            title="Turn Off Study Pet"
           >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
-
-      {distractionCount > 0 && (
-        <span className="mt-1 text-[9px] text-slate-400 font-mono">
-          {distractionCount} slap{distractionCount > 1 ? "s" : ""}
-        </span>
-      )}
     </div>
   );
 
-  // If floating on top of all laptop apps/tabs via Document PiP:
-  if (pipContainer) {
-    return createPortal(
-      <div className="w-full h-full flex flex-col items-center justify-center p-1 bg-[#090d16]">
-        {mascotBody}
-      </div>,
-      pipContainer
-    );
-  }
-
-  // Inside Lumina: Floating in the corner across Lumina tabs (docked fallback)
+  // Clean, borderless floating figure on screen (No OS window, no localhost:3000 frame)
   return (
     <>
       {/* Full-Screen Comic Slap Overlay inside Lumina when distracted */}
@@ -523,7 +485,7 @@ export function FocusPetCompanion() {
         </div>
       )}
 
-      {/* Floating Pet Companion */}
+      {/* Clean Floating Pet Figure */}
       <aside
         aria-label="Lumina Focus Pet Companion"
         onMouseDown={handleMouseDown}
