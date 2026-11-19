@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users, AppWindow } from "lucide-react";
+import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -19,6 +19,7 @@ import {
 } from "@/lib/focus/cognitive-debt";
 import { TaskSwitchTimeline } from "@/components/focus/task-switch-timeline";
 import { StudySquads } from "@/components/focus/study-squads";
+import { openPetPipWindow, closePetPipWindow } from "@/lib/focus/pet-pip-manager";
 
 export default function FocusPage() {
   const { 
@@ -29,7 +30,7 @@ export default function FocusPage() {
     stopFocus, 
     recordDistraction, 
     setPetMood,
-    togglePetEnabled
+    setPetEnabled
   } = useLuminaStore();
 
   const [timeLeft, setTimeLeft] = useState(focusSession.timeLeft || 25 * 60);
@@ -145,7 +146,19 @@ export default function FocusPage() {
     }
   };
 
-  const toggleTimer = () => {
+  const handleTogglePet = async () => {
+    if (focusSession.isPetEnabled) {
+      closePetPipWindow();
+      setPetEnabled(false);
+    } else {
+      setPetEnabled(true);
+      if (typeof window !== "undefined" && "documentPictureInPicture" in window) {
+        await openPetPipWindow();
+      }
+    }
+  };
+
+  const toggleTimer = async () => {
     if (!isActive) {
       sessionStartRef.current = Date.now();
       lastFocusStretchRef.current = Date.now();
@@ -156,9 +169,9 @@ export default function FocusPage() {
       }
       setIsActive(true);
 
-      // Auto-open floating mascot across laptop screen
-      if (typeof window !== "undefined" && "documentPictureInPicture" in window) {
-        window.dispatchEvent(new CustomEvent("lumina-open-pip"));
+      // Auto-float mascot across laptop screen when pet is enabled
+      if (focusSession.isPetEnabled && typeof window !== "undefined" && "documentPictureInPicture" in window) {
+        await openPetPipWindow();
       }
     } else {
       pauseFocus();
@@ -171,6 +184,7 @@ export default function FocusPage() {
     setMode("focus");
     setTimeLeft(25 * 60);
     stopFocus();
+    closePetPipWindow();
   };
 
   const formatTime = (seconds: number) => {
@@ -206,14 +220,14 @@ export default function FocusPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={togglePetEnabled}
+            onClick={handleTogglePet}
             className={cn(
               "text-xs px-2.5 py-1 h-7 rounded-full gap-1.5 transition-all",
               focusSession.isPetEnabled
                 ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
                 : "border-border text-muted-foreground hover:bg-accent opacity-60"
             )}
-            title={focusSession.isPetEnabled ? "Study Pet Companion: ON (Click to turn off)" : "Study Pet Companion: OFF (Click to turn on)"}
+            title={focusSession.isPetEnabled ? "Study Pet: ON (Floats across laptop. Click to turn off)" : "Study Pet: OFF (Click to turn on)"}
           >
             <span className="text-sm">🐱</span>
             <span className="text-[11px] font-medium hidden sm:inline">
@@ -274,35 +288,25 @@ export default function FocusPage() {
                     </Button>
                   </div>
 
-                  {/* Pet Symbol Toggle Button & Laptop Screen Float */}
-                  <div className="flex flex-wrap justify-center items-center gap-2 pt-1">
+                  {/* Single Pet Toggle Button */}
+                  <div className="flex justify-center items-center pt-1">
                     <button
                       type="button"
-                      onClick={togglePetEnabled}
+                      onClick={handleTogglePet}
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors",
+                        "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all",
                         focusSession.isPetEnabled
-                          ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+                          ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 shadow-sm"
                           : "border-border text-muted-foreground hover:bg-accent/40 opacity-70"
                       )}
-                      title="Toggle floating study pet on screen"
+                      title={
+                        focusSession.isPetEnabled
+                          ? "Study Pet: ON (Floats across all apps & tabs. Click to turn off)"
+                          : "Study Pet: OFF (Click to turn on & float across screen)"
+                      }
                     >
                       <span className="text-sm">🐱</span>
                       <span>Study Pet: <strong>{focusSession.isPetEnabled ? "ON" : "OFF"}</strong></span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof window !== "undefined") {
-                          window.dispatchEvent(new CustomEvent("lumina-toggle-pip"));
-                        }
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                      title="Float pet across all windows on your laptop screen"
-                    >
-                      <AppWindow className="w-3.5 h-3.5" />
-                      <span>Float Across Laptop Screen</span>
                     </button>
                   </div>
 

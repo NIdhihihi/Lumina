@@ -110,9 +110,13 @@ export const useLuminaStore = create<LuminaState>((set, get) => ({
   },
 
   stopFocus: () => {
-    set({
-      focusSession: { ...DEFAULT_FOCUS_SESSION, isActive: false },
-    });
+    set((state) => ({
+      focusSession: {
+        ...DEFAULT_FOCUS_SESSION,
+        isActive: false,
+        isPetEnabled: state.focusSession.isPetEnabled,
+      },
+    }));
   },
 
   updateFocusTimeLeft: (timeLeft: number) => {
