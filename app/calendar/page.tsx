@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarIcon, Mail, Flame, Sparkles, Filter, CheckCircle2 } from "lucide-react";
 import { StressHeatmap } from "@/components/calendar/stress-heatmap";
+import { MoodleClassroomSyncDialog } from "@/components/calendar/moodle-classroom-sync-dialog";
 import { calculateDailyStress, type StressMeterSummary } from "@/lib/sync/stress-meter";
 import { toast } from "sonner";
 import type { AcademicEmail, ScannedDeadline } from "@/lib/sync/scanner";
@@ -18,6 +19,7 @@ export default function CalendarPage() {
   const [lastSynced, setLastSynced] = useState<string>(new Date().toISOString());
   const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState("heatmap");
+  const [moodleOpen, setMoodleOpen] = useState(false);
 
   const loadSyncData = async () => {
     try {
@@ -72,17 +74,35 @@ export default function CalendarPage() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2 w-56">
-            <TabsTrigger value="heatmap" className="text-xs flex items-center gap-1.5">
-              <CalendarIcon className="w-3.5 h-3.5" /> Heatmap
-            </TabsTrigger>
-            <TabsTrigger value="emails" className="text-xs flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5" /> Scanned ({emails.length})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMoodleOpen(true)}
+            className="text-xs h-9 border-primary/40 hover:border-primary text-primary gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            Connect Moodle / Classroom
+          </Button>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid grid-cols-2 w-56 h-9">
+              <TabsTrigger value="heatmap" className="text-xs flex items-center gap-1.5">
+                <CalendarIcon className="w-3.5 h-3.5" /> Heatmap
+              </TabsTrigger>
+              <TabsTrigger value="emails" className="text-xs flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5" /> Scanned ({emails.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
+
+      <MoodleClassroomSyncDialog
+        open={moodleOpen}
+        onOpenChange={setMoodleOpen}
+        onSyncSuccess={loadSyncData}
+      />
 
       {summary ? (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
