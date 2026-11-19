@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Sidebar } from "@/components/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { FocusPetCompanion } from "@/components/focus/focus-pet-companion";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
               {children}
             </main>
           </div>
+          <FocusPetCompanion />
           <Toaster />
         </ThemeProvider>
       </body>

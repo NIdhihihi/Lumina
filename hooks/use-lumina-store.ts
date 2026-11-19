@@ -17,6 +17,7 @@ export interface FocusSessionState {
   distractionCount: number;
   petMood: "happy" | "focused" | "angry" | "jealous" | "celebrating";
   petSpeech: string;
+  isPetEnabled: boolean;
 }
 
 const DEFAULT_PROFILE: StudentProfile = {
@@ -36,6 +37,7 @@ const DEFAULT_FOCUS_SESSION: FocusSessionState = {
   distractionCount: 0,
   petMood: "focused",
   petSpeech: "I'm your Study Demon! Lock in and let's get that GPA! ⚡",
+  isPetEnabled: true,
 };
 
 interface LuminaState {
@@ -57,6 +59,8 @@ interface LuminaState {
   updateFocusTimeLeft: (timeLeft: number) => void;
   recordDistraction: (speech?: string) => void;
   setPetMood: (mood: FocusSessionState["petMood"], speech?: string) => void;
+  togglePetEnabled: () => void;
+  setPetEnabled: (enabled: boolean) => void;
   fetchNotes: () => Promise<void>;
   fetchAttendance: () => Promise<void>;
   fetchExpenses: () => Promise<void>;
@@ -78,8 +82,9 @@ export const useLuminaStore = create<LuminaState>((set, get) => ({
   focusSession: DEFAULT_FOCUS_SESSION,
 
   startFocus: (durationMinutes = 25, topic = "Deep Study") => {
-    set({
+    set((state) => ({
       focusSession: {
+        ...state.focusSession,
         isActive: true,
         mode: "focus",
         timeLeft: durationMinutes * 60,
@@ -89,7 +94,7 @@ export const useLuminaStore = create<LuminaState>((set, get) => ({
         petMood: "focused",
         petSpeech: "Locked in! I'll be watching your screen! 😼🔥",
       },
-    });
+    }));
   },
 
   pauseFocus: () => {
@@ -133,6 +138,24 @@ export const useLuminaStore = create<LuminaState>((set, get) => ({
         ...state.focusSession,
         petMood: mood,
         ...(speech ? { petSpeech: speech } : {}),
+      },
+    }));
+  },
+
+  togglePetEnabled: () => {
+    set((state) => ({
+      focusSession: {
+        ...state.focusSession,
+        isPetEnabled: !state.focusSession.isPetEnabled,
+      },
+    }));
+  },
+
+  setPetEnabled: (enabled: boolean) => {
+    set((state) => ({
+      focusSession: {
+        ...state.focusSession,
+        isPetEnabled: enabled,
       },
     }));
   },

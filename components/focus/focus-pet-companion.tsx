@@ -71,7 +71,8 @@ export function FocusPetCompanion() {
     setPetMood, 
     pauseFocus, 
     resumeFocus, 
-    stopFocus 
+    stopFocus,
+    togglePetEnabled
   } = useLuminaStore();
 
   const [minimized, setMinimized] = useState(false);
@@ -83,7 +84,7 @@ export function FocusPetCompanion() {
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number }>({ x: 0, y: 0, posX: 0, posY: 0 });
   const speechTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { isActive, timeLeft, totalDuration, topic, distractionCount, petMood, petSpeech } = focusSession;
+  const { isActive, timeLeft, totalDuration, topic, distractionCount, petMood, petSpeech, isPetEnabled } = focusSession;
 
   // 1. Live Countdown Timer Loop
   useEffect(() => {
@@ -183,8 +184,8 @@ export function FocusPetCompanion() {
     }
   }, [isScreenShaking]);
 
-  // If focus session is not active and not celebrating complete, hide the pet
-  if (!isActive && petMood !== "celebrating") {
+  // If focus session is not active (and not celebrating) or pet is disabled, hide the pet
+  if (!isPetEnabled || (!isActive && petMood !== "celebrating")) {
     return null;
   }
 

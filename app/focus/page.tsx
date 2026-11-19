@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users, Sparkles, Flame } from "lucide-react";
+import { Play, Pause, RotateCcw, Timer as TimerIcon, Coffee, Brain, Zap, ArrowRightLeft, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -28,7 +28,8 @@ export default function FocusPage() {
     resumeFocus, 
     stopFocus, 
     recordDistraction, 
-    setPetMood 
+    setPetMood,
+    togglePetEnabled
   } = useLuminaStore();
 
   const [timeLeft, setTimeLeft] = useState(focusSession.timeLeft || 25 * 60);
@@ -51,23 +52,24 @@ export default function FocusPage() {
     setIsActive(focusSession.isActive);
   }, [focusSession.isActive]);
 
-  // Timer Tick & Exponential Decay Loop
   useEffect(() => {
-    let interval: any = null;
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+    if (focusSession.isActive) {
+      setTimeLeft(focusSession.timeLeft);
+    }
+  }, [focusSession.timeLeft, focusSession.isActive]);
 
-        // Exponential decay of cognitive debt during continuous focus
-        if (mode === "focus") {
-          setCognitiveDebt((prevDebt) => calculateDecayedDebt(prevDebt, 1));
-        }
-      }, 1000);
-    } else if (timeLeft === 0) {
+  // Exponential decay of cognitive debt driven by focus timer ticks
+  useEffect(() => {
+    if (isActive && mode === "focus") {
+      setCognitiveDebt((prevDebt) => calculateDecayedDebt(prevDebt, 1));
+    }
+  }, [focusSession.timeLeft, isActive, mode]);
+
+  useEffect(() => {
+    if (isActive && timeLeft === 0) {
       handleTimerComplete();
     }
-    return () => clearInterval(interval);
-  }, [isActive, timeLeft, mode]);
+  }, [isActive, timeLeft]);
 
   // ContextSwitch Screen & Visibility Event Listeners
   useEffect(() => {
@@ -195,6 +197,24 @@ export default function FocusPage() {
           <div className="text-xs text-muted-foreground bg-accent px-3 py-1 rounded-full font-mono">
             Debt: {Math.round(cognitiveDebt)}/100
           </div>
+          {/* Pet Toggle Symbol */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={togglePetEnabled}
+            className={cn(
+              "text-xs px-2.5 py-1 h-7 rounded-full gap-1.5 transition-all",
+              focusSession.isPetEnabled
+                ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/20"
+                : "border-border text-muted-foreground hover:bg-accent opacity-60"
+            )}
+            title={focusSession.isPetEnabled ? "Study Pet Companion: ON (Click to turn off)" : "Study Pet Companion: OFF (Click to turn on)"}
+          >
+            <span className="text-sm">🐱</span>
+            <span className="text-[11px] font-medium hidden sm:inline">
+              Pet: {focusSession.isPetEnabled ? "ON" : "OFF"}
+            </span>
+          </Button>
         </div>
       </div>
 
@@ -249,6 +269,24 @@ export default function FocusPage() {
                     </Button>
                   </div>
 
+                  {/* Pet Symbol Toggle Button */}
+                  <div className="flex justify-center items-center pt-1">
+                    <button
+                      type="button"
+                      onClick={togglePetEnabled}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors",
+                        focusSession.isPetEnabled
+                          ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+                          : "border-border text-muted-foreground hover:bg-accent/40 opacity-70"
+                      )}
+                      title="Toggle floating study pet on screen"
+                    >
+                      <span className="text-sm">🐱</span>
+                      <span>Study Pet: <strong>{focusSession.isPetEnabled ? "ON" : "OFF"}</strong></span>
+                    </button>
+                  </div>
+
                   <div className="pt-4 border-t grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2 rounded-lg bg-accent/30 text-left">
                       <span className="text-muted-foreground block text-[10px] uppercase font-semibold">
@@ -279,42 +317,6 @@ export default function FocusPage() {
                   Every rapid tab switch or screen interruption adds an immediate <strong>+15 debt penalty</strong>.
                   Sustained uninterrupted study cuts accumulated debt in half every <strong>3 minutes</strong>.
                 </p>
-              </div>
-
-              {/* Study Demon Companion Banner */}
-              <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 text-xs space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-foreground flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    Study Demon Companion: Kiko
-                  </span>
-                  <Badge variant="outline" className="text-[10px]">
-                    {focusSession.isActive ? "Active Guardian" : "Idle"}
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground text-[11px] leading-relaxed">
-                  When Focus is turned on, Kiko floats across every screen in Lumina. He gets angry and slaps your screen if you switch away, praises deep flow, and fuels competitive jealousy against your Study Squad.
-                </p>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-[11px] text-destructive border-destructive/30 hover:bg-destructive/10"
-                    onClick={() => recordDistraction("TEST SLAP: Put the phone down and study! 😾💥")}
-                  >
-                    Test Slap Reaction 💥
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 text-[11px] text-purple-600 dark:text-purple-400 border-purple-500/30 hover:bg-purple-500/10"
-                    onClick={() => {
-                      setPetMood("jealous", "Meanwhile, Priya has been locked in for 45 mins. Don't let her beat you! 😤");
-                    }}
-                  >
-                    Squad Jealousy 😤
-                  </Button>
-                </div>
               </div>
             </div>
 
